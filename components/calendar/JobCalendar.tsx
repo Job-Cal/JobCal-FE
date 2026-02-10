@@ -99,13 +99,16 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
       backgroundColor: backgroundColor,
       color: '#ffffff',
       border: 'none',
-      borderRadius: '4px',
-      padding: '3px 6px',
-      fontSize: '12px',
-      fontWeight: '500',
+      borderRadius: 3,
+      padding: '1px 3px',
+      fontSize: 11,
+      fontWeight: 500,
       display: 'block',
       opacity: 1,
       visibility: 'visible' as const,
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
     };
     
     return { style };
