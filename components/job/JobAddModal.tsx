@@ -85,13 +85,13 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold">채용 공고 추가</h2>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl shadow-[0_18px_50px_rgba(0,0,0,0.2)] w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#f4e7a1]">
+        <div className="flex items-center justify-between p-6 border-b bg-[#fff7cc]">
+          <h2 className="text-2xl font-extrabold">채용 공고 추가</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-500 hover:text-gray-800"
           >
             <X size={24} />
           </button>
@@ -101,14 +101,14 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
           {!parsedData ? (
             <form onSubmit={handleSubmit(handleParse)} className="space-y-4">
               <div>
-                <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="url" className="block text-sm font-semibold text-gray-800 mb-2">
                   채용 공고 URL
                 </label>
                 <input
                   id="url"
                   type="url"
                   {...register('url', { required: 'URL을 입력해주세요.' })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-[#e6d98f] rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-[#fffef6]"
                   placeholder="https://www.wanted.co.kr/wd/..."
                 />
                 {errors.url && (
@@ -117,7 +117,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
               </div>
 
               {parseError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
                   <p className="text-sm text-red-600">{parseError}</p>
                   <button
                     type="button"
@@ -133,7 +133,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <button
                   type="submit"
                   disabled={isParsing}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary-500 text-gray-900 px-4 py-2 rounded-full hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_6px_16px_rgba(254,229,0,0.35)]"
                 >
                   {isParsing ? (
                     <>
@@ -147,7 +147,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 border border-[#e6d98f] rounded-full hover:bg-[#fff9d9]"
                 >
                   취소
                 </button>
@@ -156,31 +156,31 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
                   회사명
                 </label>
                 <input
                   type="text"
                   value={parsedData.company_name}
                   onChange={(e) => setParsedData({ ...parsedData, company_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-[#e6d98f] rounded-xl bg-[#fffef6]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
                   직무명
                 </label>
                 <input
                   type="text"
                   value={parsedData.job_title}
                   onChange={(e) => setParsedData({ ...parsedData, job_title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-[#e6d98f] rounded-xl bg-[#fffef6]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
                   마감일 *
                 </label>
                 <input
@@ -191,7 +191,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                     console.log('📅 Deadline changed:', newDeadline);
                     setParsedData({ ...parsedData, deadline: newDeadline });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-[#e6d98f] rounded-xl bg-[#fffef6]"
                   required
                 />
                 {!parsedData.deadline && (
@@ -202,20 +202,45 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
                   URL
                 </label>
                 <input
                   type="url"
                   value={parsedData.original_url}
                   onChange={(e) => setParsedData({ ...parsedData, original_url: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-[#e6d98f] rounded-xl bg-[#fffef6]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  위치
+                </label>
+                <input
+                  type="text"
+                  value={parsedData.location || ''}
+                  onChange={(e) => setParsedData({ ...parsedData, location: e.target.value || null })}
+                  className="w-full px-4 py-2 border border-[#e6d98f] rounded-xl bg-[#fffef6]"
+                  placeholder="예: 서울 강남구"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  공고 설명/요건
+                </label>
+                <textarea
+                  value={parsedData.description || ''}
+                  onChange={(e) => setParsedData({ ...parsedData, description: e.target.value || null })}
+                  className="w-full px-4 py-3 border border-[#e6d98f] rounded-xl bg-[#fffef6] min-h-[140px]"
+                  placeholder="파싱된 공고 설명/요건이 여기에 표시됩니다."
                 />
               </div>
 
               {!parsedData.deadline && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
+                <div className="p-3 bg-[#fff7cc] border border-[#f0de8d] rounded-xl">
+                  <p className="text-sm text-[#7a6400]">
                     ⚠️ 마감일이 없습니다. 캘린더에 표시하려면 마감일을 입력해주세요.
                   </p>
                 </div>
@@ -225,7 +250,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <button
                   onClick={handleSave}
                   disabled={isSaving || !parsedData.company_name || !parsedData.job_title}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary-500 text-gray-900 px-4 py-2 rounded-full hover:bg-primary-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_6px_16px_rgba(254,229,0,0.35)]"
                 >
                   {isSaving ? (
                     <>
@@ -241,13 +266,13 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                     setParsedData(null);
                     setParseError(null);
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 border border-[#e6d98f] rounded-full hover:bg-[#fff9d9]"
                 >
                   다시 파싱
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 border border-[#e6d98f] rounded-full hover:bg-[#fff9d9]"
                 >
                   취소
                 </button>
@@ -259,4 +284,3 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
     </div>
   );
 }
-

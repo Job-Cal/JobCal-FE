@@ -4,8 +4,9 @@ import { Calendar, momentLocalizer, View, Event } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Application } from '@/types/application';
-import { ApplicationStatusColors } from '@/types/application';
+import { ApplicationStatusStyles } from '@/types/application';
 import { useState } from 'react';
+import { CalendarCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import JobEvent from './JobEvent';
 
 // Extend Event type to include our custom properties
@@ -94,21 +95,16 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
       return { style: {} };
     }
     
-    const backgroundColor = ApplicationStatusColors[app.status];
     const style: React.CSSProperties = {
-      backgroundColor: backgroundColor,
-      color: '#ffffff',
+      backgroundColor: 'transparent',
+      color: '#111827',
       border: 'none',
-      borderRadius: 3,
-      padding: '1px 3px',
-      fontSize: 11,
-      fontWeight: 500,
+      borderRadius: 0,
+      padding: 0,
       display: 'block',
       opacity: 1,
       visibility: 'visible' as const,
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
+      overflow: 'visible',
     };
     
     return { style };
@@ -120,6 +116,41 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
     }
   };
 
+
+  const Toolbar = ({ label, onNavigate }: { label: string; onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY') => void }) => (
+    <div className="rbc-toolbar">
+      <span className="rbc-toolbar-label">{label}</span>
+      <span className="rbc-btn-group flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onNavigate('PREV')}
+          aria-label="이전"
+          title="이전"
+          className="flex h-9 w-9 items-center justify-center"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate('TODAY')}
+          aria-label="오늘"
+          title="오늘"
+          className="flex h-9 w-9 items-center justify-center"
+        >
+          <CalendarCheck size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate('NEXT')}
+          aria-label="다음"
+          title="다음"
+          className="flex h-9 w-9 items-center justify-center"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </span>
+    </div>
+  );
 
   return (
     <div className="w-full" style={{ minHeight: 600 }}>
@@ -133,13 +164,14 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         events={events}
         startAccessor="start"
         endAccessor="end"
-        view="month"
+        defaultView="month"
         date={currentDate}
         onNavigate={setCurrentDate}
         onSelectEvent={handleSelectEvent}
         eventPropGetter={eventStyleGetter}
         components={{
           event: JobEvent,
+          toolbar: Toolbar,
         }}
         showAllEvents
         popup={false}

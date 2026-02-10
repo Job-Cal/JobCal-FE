@@ -10,7 +10,7 @@ import {
   Application,
   ApplicationStatus,
   ApplicationStatusLabels,
-  ApplicationStatusColors,
+  ApplicationStatusStyles,
 } from '@/types/application';
 
 export default function Home() {
@@ -172,22 +172,31 @@ export default function Home() {
     },
   ];
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (options?: { showLoading?: boolean }) => {
     try {
-      setIsLoading(true);
+      const showLoading = options?.showLoading ?? true;
+      if (showLoading) {
+        setIsLoading(true);
+      }
       const data = await applicationsApi.getAll();
       console.log('Fetched applications:', data);
       console.log('Applications with deadlines:', data.filter(app => app.job_posting.deadline));
       setApplications(data);
+      if (selectedApplication) {
+        const updatedSelection = data.find(app => app.id === selectedApplication.id) || null;
+        setSelectedApplication(updatedSelection);
+      }
     } catch (error) {
       console.error('Failed to fetch applications:', error);
     } finally {
-      setIsLoading(false);
+      if (options?.showLoading ?? true) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchApplications();
+    fetchApplications({ showLoading: true });
   }, []);
 
   const handleSelectEvent = (application: Application) => {
@@ -205,30 +214,30 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <p className="mt-4 text-gray-700">로딩 중...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+    <main className="min-h-screen bg-[#fffbed]">
+      <div className="container mx-auto px-4 py-10">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">JobCal</h1>
-            <p className="text-gray-600 mt-1">채용 일정 관리</p>
+            <h1 className="text-3xl font-black tracking-tight text-gray-900">JobCal</h1>
+            <p className="text-gray-700 mt-1">채용 일정 관리</p>
           </div>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+            className="flex items-center gap-2 bg-primary-500 text-gray-900 px-5 py-2.5 rounded-full hover:bg-primary-400 transition-colors shadow-[0_6px_18px_rgba(254,229,0,0.35)]"
           >
             <Plus size={20} />
             공고 추가
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-6 border border-[#f4e7a1]">
           <JobCalendar
             // 실제 데이터가 없을 때는 예시 데이터로 캘린더 UI를 미리 확인할 수 있게 함
             applications={applications.length > 0 ? applications : mockApplications}
@@ -237,30 +246,30 @@ export default function Home() {
         </div>
 
         <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-4">전체 지원 현황</h2>
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">전체 지원 현황</h2>
+          <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] overflow-hidden border border-[#f4e7a1]">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-[#fff7cc]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       회사명
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       직무
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       마감일
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       상태
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-[#f5eab6]">
                   {applications.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                      <td colSpan={4} className="px-6 py-4 text-center text-gray-600">
                         등록된 채용 공고가 없습니다.
                       </td>
                     </tr>
@@ -268,26 +277,27 @@ export default function Home() {
                     applications.map((app) => (
                       <tr
                         key={app.id}
-                        className="hover:bg-gray-50 cursor-pointer"
+                        className="hover:bg-[#fff9d9] cursor-pointer transition-colors"
                         onClick={() => handleSelectEvent(app)}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                           {app.job_posting.company_name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                           {app.job_posting.job_title}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                           {app.job_posting.deadline
                             ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
                             : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className="px-2 py-1 text-xs font-semibold rounded-full"
+                            className="px-2 py-1 text-xs font-bold rounded-full"
                             style={{
-                              backgroundColor: `${ApplicationStatusColors[app.status]}20`,
-                              color: ApplicationStatusColors[app.status],
+                              backgroundColor: ApplicationStatusStyles[app.status].bg,
+                              color: ApplicationStatusStyles[app.status].text,
+                              border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
                             }}
                           >
                             {ApplicationStatusLabels[app.status]}
@@ -306,14 +316,14 @@ export default function Home() {
       <JobAddModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSuccess={fetchApplications}
+        onSuccess={() => fetchApplications({ showLoading: true })}
       />
 
       <JobDetailPanel
         application={selectedApplication}
         isOpen={isDetailPanelOpen}
         onClose={handleCloseDetailPanel}
-        onUpdate={fetchApplications}
+        onUpdate={() => fetchApplications({ showLoading: false })}
       />
     </main>
   );

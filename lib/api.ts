@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { JobPosting, JobPostingParseRequest, JobPostingParseResponse, JobPostingCreate } from '@/types/job';
-import { Application, ApplicationUpdate } from '@/types/application';
+import { Application, ApplicationStatus, ApplicationUpdate } from '@/types/application';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -13,6 +13,29 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+const normalizeStatus = (status: string): ApplicationStatus => {
+  const upper = status?.toUpperCase?.() ?? status;
+  switch (upper) {
+    case ApplicationStatus.NOT_APPLIED:
+      return ApplicationStatus.NOT_APPLIED;
+    case ApplicationStatus.APPLIED:
+      return ApplicationStatus.APPLIED;
+    case ApplicationStatus.IN_PROGRESS:
+      return ApplicationStatus.IN_PROGRESS;
+    case ApplicationStatus.REJECTED:
+      return ApplicationStatus.REJECTED;
+    case ApplicationStatus.ACCEPTED:
+      return ApplicationStatus.ACCEPTED;
+    default:
+      return ApplicationStatus.NOT_APPLIED;
+  }
+};
+
+const normalizeApplication = (app: Application): Application => ({
+  ...app,
+  status: normalizeStatus(app.status as unknown as string),
 });
 
 // Jobs API
@@ -37,17 +60,18 @@ export const jobsApi = {
 export const applicationsApi = {
   getAll: async (): Promise<Application[]> => {
     const response = await apiClient.get<Application[]>('/applications');
-    return response.data;
+    return response.data.map(normalizeApplication);
   },
 
   getById: async (id: number): Promise<Application> => {
     const response = await apiClient.get<Application>(`/applications/${id}`);
-    return response.data;
+    return normalizeApplication(response.data);
   },
 
   updateStatus: async (id: number, updateData: ApplicationUpdate): Promise<Application> => {
     const response = await apiClient.patch<Application>(`/applications/${id}/status`, updateData);
-    return response.data;
+    console.log('updateStatus response:', response.data);
+    return normalizeApplication(response.data);
   },
 
   delete: async (id: number): Promise<void> => {

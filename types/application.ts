@@ -1,11 +1,11 @@
 import { JobPosting } from './job';
 
 export enum ApplicationStatus {
-  NOT_APPLIED = 'not_applied',
-  APPLIED = 'applied',
-  IN_PROGRESS = 'in_progress',
-  REJECTED = 'rejected',
-  ACCEPTED = 'accepted',
+  NOT_APPLIED = 'NOT_APPLIED',
+  APPLIED = 'APPLIED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  REJECTED = 'REJECTED',
+  ACCEPTED = 'ACCEPTED',
 }
 
 export interface Application {
@@ -33,10 +33,45 @@ export const ApplicationStatusLabels: Record<ApplicationStatus, string> = {
 };
 
 export const ApplicationStatusColors: Record<ApplicationStatus, string> = {
-  [ApplicationStatus.NOT_APPLIED]: '#6b7280', // gray
-  [ApplicationStatus.APPLIED]: '#3b82f6', // blue
-  [ApplicationStatus.IN_PROGRESS]: '#f59e0b', // amber
-  [ApplicationStatus.REJECTED]: '#ef4444', // red
-  [ApplicationStatus.ACCEPTED]: '#10b981', // green
+  [ApplicationStatus.NOT_APPLIED]: '#6b7280',
+  [ApplicationStatus.APPLIED]: '#fee500',
+  [ApplicationStatus.IN_PROGRESS]: '#ffb020',
+  [ApplicationStatus.REJECTED]: '#ff5a5a',
+  [ApplicationStatus.ACCEPTED]: '#34c759',
 };
 
+export const ApplicationStatusStyles: Record<
+  ApplicationStatus,
+  { bg: string; text: string; border: string; accent: string }
+> = {
+  [ApplicationStatus.NOT_APPLIED]: {
+    bg: '#f3f4f6',
+    text: '#4b5563',
+    border: '#d1d5db',
+    accent: '#9ca3af',
+  },
+  [ApplicationStatus.APPLIED]: {
+    bg: '#fff7cc',
+    text: '#1a1a1a',
+    border: '#f0de8d',
+    accent: '#fee500',
+  },
+  [ApplicationStatus.IN_PROGRESS]: {
+    bg: '#fff1d6',
+    text: '#7a4a00',
+    border: '#ffd7a0',
+    accent: '#ffb020',
+  },
+  [ApplicationStatus.REJECTED]: {
+    bg: '#ffe5e5',
+    text: '#b91c1c',
+    border: '#fecaca',
+    accent: '#ff5a5a',
+  },
+  [ApplicationStatus.ACCEPTED]: {
+    bg: '#e8fff1',
+    text: '#0f7a3a',
+    border: '#b7f3cd',
+    accent: '#34c759',
+  },
+};
