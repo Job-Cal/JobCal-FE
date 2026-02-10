@@ -107,6 +107,69 @@ export default function Home() {
         updated_at: null,
       },
     },
+    {
+      id: 5,
+      user_id: 1,
+      job_posting_id: 5,
+      status: ApplicationStatus.APPLIED,
+      memo: '동일 날짜 추가 공고 3',
+      created_at: new Date().toISOString(),
+      updated_at: null,
+      job_posting: {
+        id: 5,
+        company_name: '픽셀랩',
+        job_title: 'UI 엔지니어',
+        deadline: '2026-02-20',
+        original_url: 'https://example.com/jobs/5',
+        parsed_data: null,
+        description: '디자인 시스템 구축 및 UI 구현',
+        location: '서울',
+        created_at: new Date().toISOString(),
+        updated_at: null,
+      },
+    },
+    {
+      id: 6,
+      user_id: 1,
+      job_posting_id: 6,
+      status: ApplicationStatus.IN_PROGRESS,
+      memo: '동일 날짜 추가 공고 4',
+      created_at: new Date().toISOString(),
+      updated_at: null,
+      job_posting: {
+        id: 6,
+        company_name: '클라우드웍스',
+        job_title: '플랫폼 엔지니어',
+        deadline: '2026-02-20',
+        original_url: 'https://example.com/jobs/6',
+        parsed_data: null,
+        description: '배포 파이프라인 및 인프라 자동화',
+        location: '리모트',
+        created_at: new Date().toISOString(),
+        updated_at: null,
+      },
+    },
+    {
+      id: 7,
+      user_id: 1,
+      job_posting_id: 7,
+      status: ApplicationStatus.NOT_APPLIED,
+      memo: '동일 날짜 추가 공고 5',
+      created_at: new Date().toISOString(),
+      updated_at: null,
+      job_posting: {
+        id: 7,
+        company_name: '데이터킷',
+        job_title: '데이터 엔지니어',
+        deadline: '2026-02-20',
+        original_url: 'https://example.com/jobs/7',
+        parsed_data: null,
+        description: 'ETL 및 데이터 파이프라인 구축',
+        location: '판교',
+        created_at: new Date().toISOString(),
+        updated_at: null,
+      },
+    },
   ];
 
   const fetchApplications = async () => {
@@ -255,4 +318,3 @@ export default function Home() {
     </main>
   );
 }
-

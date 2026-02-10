@@ -1,18 +1,19 @@
 'use client';
 
 import { Application } from '@/types/application';
-import { ApplicationStatusLabels } from '@/types/application';
-import { Event } from 'react-big-calendar';
+import { ApplicationStatusLabels, ApplicationStatusColors } from '@/types/application';
 
 interface JobEventProps {
-  event: Event;
+  application?: Application; // 커스텀 캘린더용
+  event?: { resource?: Application }; // react-big-calendar 호환용 (기존 구조)
 }
 
-export default function JobEvent({ event }: JobEventProps) {
-  const app = (event as any).resource as Application | undefined;
-  
-  if (!app) {
-    return <div className="text-xs p-1">{event.title}</div>;
+export default function JobEvent({ application, event }: JobEventProps) {
+  // application prop 우선 사용, 없으면 event.resource에서 가져오기
+  const app = application ?? (event?.resource as Application | undefined);
+
+  if (!app || !app.job_posting) {
+    return null;
   }
 
   const posting = app.job_posting;
@@ -25,10 +26,14 @@ export default function JobEvent({ event }: JobEventProps) {
   const location = posting.location;
   const title = posting.job_title;
   const statusLabel = ApplicationStatusLabels[app.status];
+  const backgroundColor = ApplicationStatusColors[app.status];
   
   return (
     // 한 셀 안에 여러 이벤트가 들어갈 수 있도록 매우 컴팩트한 레이아웃으로 구성
-    <div className="flex w-full flex-col p-[2px] text-[9px] leading-snug">
+    <div
+      className="flex w-full flex-col rounded-[3px] bg-opacity-100 p-[2px] text-[9px] leading-snug text-white"
+      style={{ backgroundColor }}
+    >
       {/* 회사명 + 직무 (한 줄 안에서 최대한 압축) */}
       <div className="truncate font-semibold">
         {posting.company_name}

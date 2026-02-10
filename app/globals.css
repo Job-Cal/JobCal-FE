@@ -25,3 +25,32 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.job-calendar .rbc-month-view,
+.job-calendar .rbc-month-row,
+.job-calendar .rbc-row-content,
+.job-calendar .rbc-row-content-scrollable,
+.job-calendar .rbc-row-content-scrollable .rbc-row-content-scroll-container {
+  height: auto;
+}
+
+.job-calendar .rbc-row-content-scrollable .rbc-row-content-scroll-container {
+  overflow: visible;
+}
+
+.job-calendar .rbc-month-view {
+  flex: 0 0 auto;
+}
+
+.job-calendar .rbc-month-row,
+.job-calendar .rbc-row-bg {
+  flex: 0 0 auto;
+}
+
+.job-calendar .rbc-month-row {
+  min-height: 140px;
+}
+
+.job-calendar .rbc-row-content {
+  padding-bottom: 6px;
+}

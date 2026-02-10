@@ -122,7 +122,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
 
 
   return (
-    <div className="h-[600px] w-full" style={{ height: '600px' }}>
+    <div className="w-full" style={{ minHeight: 600 }}>
       {events.length === 0 && (
         <div className="p-4 text-center text-gray-500 mb-4">
           마감일이 있는 공고가 없습니다. 공고를 추가하고 마감일을 입력해주세요.
@@ -141,10 +141,12 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         components={{
           event: JobEvent,
         }}
+        showAllEvents
         popup={false}
         defaultView="month"
         views={['month']}
-        style={{ height: '100%' }}
+        className="job-calendar"
+        style={{ height: 'auto', minHeight: 600 }}
         messages={{
           next: '다음',
           previous: '이전',
@@ -156,4 +158,3 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
     </div>
   );
 }
-
