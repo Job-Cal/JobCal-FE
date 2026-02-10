@@ -1,0 +1,262 @@
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { X, Loader2 } from 'lucide-react';
+import { jobsApi, applicationsApi } from '@/lib/api';
+import { JobPostingCreate } from '@/types/job';
+
+interface JobAddModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+interface FormData {
+  url: string;
+}
+
+export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalProps) {
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [parsedData, setParsedData] = useState<JobPostingCreate | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
+
+  if (!isOpen) return null;
+
+  const handleParse = async (data: FormData) => {
+    setIsParsing(true);
+    setParseError(null);
+    setParsedData(null);
+
+    try {
+      const result = await jobsApi.parse(data.url);
+      
+      if (result.success && result.data) {
+        setParsedData(result.data);
+      } else {
+        setParseError(result.error || '파싱에 실패했습니다.');
+      }
+    } catch (error: any) {
+      setParseError(error.response?.data?.detail || '파싱 중 오류가 발생했습니다.');
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!parsedData) return;
+
+    setIsSaving(true);
+    try {
+      // Debug: log data before sending
+      console.log('📤 Sending job data:', parsedData);
+      console.log('📅 Deadline:', parsedData.deadline, 'Type:', typeof parsedData.deadline);
+      
+      const result = await jobsApi.create(parsedData);
+      console.log('✅ Job created successfully:', result);
+      console.log('📅 Saved deadline:', result.deadline);
+      
+      reset();
+      setParsedData(null);
+      setParseError(null);
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      console.error('❌ Error saving job:', error);
+      setParseError(error.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleManualInput = () => {
+    // Allow manual input if parsing fails
+    setParsedData({
+      company_name: '',
+      job_title: '',
+      deadline: null,
+      original_url: '',
+      description: null,
+      location: null,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-2xl font-bold">채용 공고 추가</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {!parsedData ? (
+            <form onSubmit={handleSubmit(handleParse)} className="space-y-4">
+              <div>
+                <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
+                  채용 공고 URL
+                </label>
+                <input
+                  id="url"
+                  type="url"
+                  {...register('url', { required: 'URL을 입력해주세요.' })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="https://www.wanted.co.kr/wd/..."
+                />
+                {errors.url && (
+                  <p className="mt-1 text-sm text-red-600">{errors.url.message}</p>
+                )}
+              </div>
+
+              {parseError && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600">{parseError}</p>
+                  <button
+                    type="button"
+                    onClick={handleManualInput}
+                    className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                  >
+                    수동으로 입력하기
+                  </button>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={isParsing}
+                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isParsing ? (
+                    <>
+                      <Loader2 className="animate-spin" size={16} />
+                      파싱 중...
+                    </>
+                  ) : (
+                    '파싱하기'
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  취소
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  회사명
+                </label>
+                <input
+                  type="text"
+                  value={parsedData.company_name}
+                  onChange={(e) => setParsedData({ ...parsedData, company_name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  직무명
+                </label>
+                <input
+                  type="text"
+                  value={parsedData.job_title}
+                  onChange={(e) => setParsedData({ ...parsedData, job_title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  마감일 *
+                </label>
+                <input
+                  type="date"
+                  value={parsedData.deadline || ''}
+                  onChange={(e) => {
+                    const newDeadline = e.target.value || null;
+                    console.log('📅 Deadline changed:', newDeadline);
+                    setParsedData({ ...parsedData, deadline: newDeadline });
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  required
+                />
+                {!parsedData.deadline && (
+                  <p className="mt-1 text-sm text-yellow-600">
+                    ⚠️ 마감일을 입력하지 않으면 캘린더에 표시되지 않습니다.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  URL
+                </label>
+                <input
+                  type="url"
+                  value={parsedData.original_url}
+                  onChange={(e) => setParsedData({ ...parsedData, original_url: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              {!parsedData.deadline && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    ⚠️ 마감일이 없습니다. 캘린더에 표시하려면 마감일을 입력해주세요.
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving || !parsedData.company_name || !parsedData.job_title}
+                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="animate-spin" size={16} />
+                      저장 중...
+                    </>
+                  ) : (
+                    '저장하기'
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setParsedData(null);
+                    setParseError(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  다시 파싱
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
