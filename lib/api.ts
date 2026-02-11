@@ -4,6 +4,7 @@ import { Application, ApplicationStatus, ApplicationUpdate } from '@/types/appli
 import { getAuthToken, parseBearerToken, removeAuthToken, setAuthToken } from '@/lib/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_PREFIX = '/api';
 const COGNITO_DOMAIN = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
 const COGNITO_CLIENT_ID = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
 const COGNITO_REDIRECT_URI = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI;
@@ -16,7 +17,7 @@ if (!API_BASE_URL) {
 }
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: API_BASE_URL ? `${API_BASE_URL}${API_PREFIX}` : API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -131,7 +132,8 @@ const getCognitoLoginUrl = (): string | null => {
 };
 
 export const authApi = {
-  getLoginUrl: (): string => getCognitoLoginUrl() ?? `${API_BASE_URL}/oauth2/authorization/cognito`,
+  getLoginUrl: (): string =>
+    getCognitoLoginUrl() ?? `${API_BASE_URL}${API_PREFIX}/oauth2/authorization/cognito`,
   fetchAccessToken: async (): Promise<void> => {
     await apiClient.get('/auth/token');
   },
