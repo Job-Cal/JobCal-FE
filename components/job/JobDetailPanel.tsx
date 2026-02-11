@@ -52,13 +52,13 @@ export default function JobDetailPanel({
   };
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.2)] z-40 transform transition-transform duration-300 ease-in-out border-l border-[#f4e7a1]">
+    <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.18)] z-40 transform transition-transform duration-300 ease-in-out border-l border-[#e5edff]">
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-6 border-b bg-[#fff7cc]">
-          <h2 className="text-xl font-extrabold">채용 상세</h2>
+        <div className="flex items-center justify-between p-6 border-b bg-[#f3f6ff]">
+          <h2 className="text-xl font-extrabold text-slate-900">채용 상세</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-800"
+            className="text-slate-500 hover:text-slate-800"
           >
             <X size={24} />
           </button>
@@ -67,21 +67,21 @@ export default function JobDetailPanel({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Building2 size={20} className="text-gray-500" />
-              <h3 className="text-lg font-bold">{application.job_posting.company_name}</h3>
+              <Building2 size={20} className="text-slate-500" />
+              <h3 className="text-lg font-bold text-slate-900">{application.job_posting.company_name}</h3>
             </div>
-            <p className="text-gray-700">{application.job_posting.job_title}</p>
+            <p className="text-slate-600">{application.job_posting.job_title}</p>
           </div>
 
           {application.job_posting.deadline && (
-            <div className="flex items-center gap-2 text-gray-700">
+            <div className="flex items-center gap-2 text-slate-600">
               <Calendar size={18} />
               <span>마감일: {new Date(application.job_posting.deadline).toLocaleDateString('ko-KR')}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-2">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               지원 상태
             </label>
             <div className="space-y-2">
@@ -116,8 +116,8 @@ export default function JobDetailPanel({
                             }
                           : {
                               backgroundColor: '#ffffff',
-                              borderColor: '#e6d98f',
-                              color: '#1a1a1a',
+                              borderColor: '#e2e8f0',
+                              color: '#0f172a',
                             }
                       }
                     >
@@ -131,19 +131,19 @@ export default function JobDetailPanel({
 
           {application.job_posting.location && (
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
                 근무지역
               </label>
-              <p className="text-gray-700">{application.job_posting.location}</p>
+              <p className="text-slate-600">{application.job_posting.location}</p>
             </div>
           )}
 
           {application.job_posting.description && (
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
                 설명
               </label>
-              <p className="text-gray-700 text-sm whitespace-pre-wrap">
+              <p className="text-slate-600 text-sm whitespace-pre-wrap">
                 {application.job_posting.description}
               </p>
             </div>
@@ -151,10 +151,10 @@ export default function JobDetailPanel({
 
           {application.memo && (
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-1">
                 메모
               </label>
-              <p className="text-gray-700 text-sm">{application.memo}</p>
+              <p className="text-slate-600 text-sm">{application.memo}</p>
             </div>
           )}
 
@@ -163,7 +163,7 @@ export default function JobDetailPanel({
               href={application.job_posting.original_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-gray-900 hover:text-gray-700 underline decoration-[#fee500]"
+              className="flex items-center gap-2 text-slate-900 hover:text-primary-600 underline decoration-primary-400"
             >
               <ExternalLink size={16} />
               원본 공고 보기
@@ -171,7 +171,7 @@ export default function JobDetailPanel({
           </div>
         </div>
 
-        <div className="p-6 border-t bg-[#fffbed]">
+        <div className="p-6 border-t bg-[#f7f9ff]">
           <button
             onClick={async () => {
               if (confirm('정말 삭제하시겠습니까?')) {
@@ -184,7 +184,7 @@ export default function JobDetailPanel({
                 }
               }
             }}
-            className="w-full px-4 py-2 bg-[#ff5a5a] text-white rounded-full hover:bg-[#ff3f3f]"
+            className="w-full px-4 py-2 bg-rose-500 text-white rounded-full hover:bg-rose-600"
           >
             삭제하기
           </button>
