@@ -11,6 +11,7 @@ COPY . .
 
 ARG ENV_DEV
 RUN echo "$ENV_DEV" > .env
+RUN mkdir -p public
 RUN npm run build
 
 FROM node:20-alpine AS runner
