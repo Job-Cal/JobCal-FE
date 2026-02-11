@@ -1,0 +1,26 @@
+name: CD - Deploy Next.js
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: root
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          envs: DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }},DOCKERHUB_TOKEN=${{ secrets.DOCKERHUB_TOKEN }}
+          script: |
+            set -e
+            IMAGE_REPO="${DOCKERHUB_USERNAME}/jobcal-fe"
+            docker login -u "${DOCKERHUB_USERNAME}" -p "${DOCKERHUB_TOKEN}"
+            docker pull "${IMAGE_REPO}:latest"
+            docker stop jobcal-fe || true
+            docker rm jobcal-fe || true
+            docker run -d --name jobcal-fe -p 3000:3000 --restart unless-stopped "${IMAGE_REPO}:latest"
