@@ -1,24 +1,26 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-ARG ENV_DEV
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+ARG ENV_DEV
+RUN echo "$ENV_DEV" > .env
 RUN npm run build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
-ARG ENV_DEV
-ENV NODE_ENV=production
-ENV ENV_DEV=$ENV_DEV
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+
+# [권장] standalone 모드를 사용하면 node_modules 전체를 복사할 필요가 없어 가볍습니다.
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./next.config.js
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
 EXPOSE 3000
-CMD ["npm","run","start"]
+# standalone 모드 실행 시 node server.js를 사용합니다.
+CMD ["node", "server.js"]
