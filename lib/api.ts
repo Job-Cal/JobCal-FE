@@ -133,7 +133,7 @@ const getCognitoLoginUrl = (): string | null => {
 
 export const authApi = {
   getLoginUrl: (): string =>
-    getCognitoLoginUrl() ?? `${API_BASE_URL}${API_PREFIX}/oauth2/authorization/cognito`,
+    getCognitoLoginUrl() ?? `${API_BASE_URL}/oauth2/authorization/cognito`,
   fetchAccessToken: async (): Promise<void> => {
     await apiClient.get('/auth/token');
   },
