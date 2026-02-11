@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Plus } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
 import JobAddModal from '@/components/job/JobAddModal';
 import JobDetailPanel from '@/components/job/JobDetailPanel';
-import { applicationsApi } from '@/lib/api';
+import { applicationsApi, authApi } from '@/lib/api';
+import { removeAuthToken } from '@/lib/auth';
 import {
   Application,
-  ApplicationStatus,
   ApplicationStatusLabels,
   ApplicationStatusStyles,
 } from '@/types/application';
@@ -16,161 +17,10 @@ import {
 export default function Home() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
-
-  // 예시용 더미 데이터: 실제 공고가 없을 때 캘린더에 표시
-  const mockApplications: Application[] = [
-    {
-      id: 1,
-      user_id: 1,
-      job_posting_id: 1,
-      status: ApplicationStatus.APPLIED,
-      memo: '첫 번째 더미 공고 메모',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 1,
-        company_name: '잡칼 컴퍼니',
-        job_title: '프론트엔드 엔지니어',
-        deadline: '2026-02-20',
-        original_url: 'https://example.com/jobs/1',
-        parsed_data: null,
-        description: 'React, TypeScript 기반 프론트엔드 개발',
-        location: '서울',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-    // 같은 날짜(2026-02-20)에 또 다른 공고 예시
-    {
-      id: 4,
-      user_id: 1,
-      job_posting_id: 4,
-      status: ApplicationStatus.IN_PROGRESS,
-      memo: '동일 마감일 테스트용 공고',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 4,
-        company_name: '잡칼 컴퍼니 B',
-        job_title: '백엔드 엔지니어',
-        deadline: '2026-02-20', // 위 공고와 같은 날짜
-        original_url: 'https://example.com/jobs/4',
-        parsed_data: null,
-        description: '동일 마감일 공고가 여러 개일 때 캘린더 표시 확인용',
-        location: '서울',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-    {
-      id: 2,
-      user_id: 1,
-      job_posting_id: 2,
-      status: ApplicationStatus.IN_PROGRESS,
-      memo: '동일 날짜 다른 회사 공고 1',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 2,
-        company_name: '네오잡스',
-        job_title: '풀스택 개발자 (Node.js)',
-        deadline: '2026-02-20',
-        original_url: 'https://example.com/jobs/2',
-        parsed_data: null,
-        description: '동일 마감일 공고 예시 3',
-        location: '리모트',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-    {
-      id: 3,
-      user_id: 1,
-      job_posting_id: 3,
-      status: ApplicationStatus.NOT_APPLIED,
-      memo: '동일 날짜 다른 회사 공고 2',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 3,
-        company_name: '스타트업 XYZ',
-        job_title: '주니어 프론트엔드 개발자',
-        deadline: '2026-02-20',
-        original_url: 'https://example.com/jobs/3',
-        parsed_data: null,
-        description: '동일 마감일 공고 예시 4',
-        location: '판교',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-    {
-      id: 5,
-      user_id: 1,
-      job_posting_id: 5,
-      status: ApplicationStatus.APPLIED,
-      memo: '동일 날짜 추가 공고 3',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 5,
-        company_name: '픽셀랩',
-        job_title: 'UI 엔지니어',
-        deadline: '2026-02-20',
-        original_url: 'https://example.com/jobs/5',
-        parsed_data: null,
-        description: '디자인 시스템 구축 및 UI 구현',
-        location: '서울',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-    {
-      id: 6,
-      user_id: 1,
-      job_posting_id: 6,
-      status: ApplicationStatus.IN_PROGRESS,
-      memo: '동일 날짜 추가 공고 4',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 6,
-        company_name: '클라우드웍스',
-        job_title: '플랫폼 엔지니어',
-        deadline: '2026-02-20',
-        original_url: 'https://example.com/jobs/6',
-        parsed_data: null,
-        description: '배포 파이프라인 및 인프라 자동화',
-        location: '리모트',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-    {
-      id: 7,
-      user_id: 1,
-      job_posting_id: 7,
-      status: ApplicationStatus.NOT_APPLIED,
-      memo: '동일 날짜 추가 공고 5',
-      created_at: new Date().toISOString(),
-      updated_at: null,
-      job_posting: {
-        id: 7,
-        company_name: '데이터킷',
-        job_title: '데이터 엔지니어',
-        deadline: '2026-02-20',
-        original_url: 'https://example.com/jobs/7',
-        parsed_data: null,
-        description: 'ETL 및 데이터 파이프라인 구축',
-        location: '판교',
-        created_at: new Date().toISOString(),
-        updated_at: null,
-      },
-    },
-  ];
 
   const fetchApplications = async (options?: { showLoading?: boolean }) => {
     try {
@@ -179,6 +29,7 @@ export default function Home() {
         setIsLoading(true);
       }
       const data = await applicationsApi.getAll();
+      setIsAuthenticated(true);
       console.log('Fetched applications:', data);
       console.log('Applications with deadlines:', data.filter(app => app.job_posting.deadline));
       setApplications(data);
@@ -187,7 +38,11 @@ export default function Home() {
         setSelectedApplication(updatedSelection);
       }
     } catch (error) {
-      console.error('Failed to fetch applications:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setIsAuthenticated(false);
+      } else {
+        console.error('Failed to fetch applications:', error);
+      }
     } finally {
       if (options?.showLoading ?? true) {
         setIsLoading(false);
@@ -196,7 +51,20 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchApplications({ showLoading: true });
+    const bootstrap = async () => {
+      try {
+        await authApi.fetchAccessToken();
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+      }
+      fetchApplications({ showLoading: true });
+    };
+
+    bootstrap();
   }, []);
 
   const handleSelectEvent = (application: Application) => {
@@ -220,6 +88,38 @@ export default function Home() {
     );
   }
 
+  if (isAuthenticated === false) {
+    return (
+      <main className="min-h-screen bg-[#fffbed] flex items-center justify-center px-4">
+        <div className="w-full max-w-lg bg-white border border-[#f4e7a1] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-8">
+          <h1 className="text-2xl font-black tracking-tight text-gray-900">로그인이 필요합니다</h1>
+          <p className="text-gray-700 mt-2">
+            잡칼을 사용하려면 코그니토 로그인이 필요합니다. 아래 버튼을 눌러 로그인해 주세요.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            <button
+              onClick={() => {
+                window.location.href = authApi.getLoginUrl();
+              }}
+              className="w-full bg-primary-500 text-gray-900 px-5 py-3 rounded-full font-bold hover:bg-primary-400 transition-colors shadow-[0_6px_18px_rgba(254,229,0,0.35)]"
+            >
+              코그니토로 로그인
+            </button>
+            <button
+              onClick={() => fetchApplications({ showLoading: true })}
+              className="w-full border border-gray-300 text-gray-700 px-5 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors"
+            >
+              다시 시도
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">
+            로그인 완료 후 이 화면으로 다시 돌아오면 자동으로 세션이 인식됩니다.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#fffbed]">
       <div className="container mx-auto px-4 py-10">
@@ -228,21 +128,29 @@ export default function Home() {
             <h1 className="text-3xl font-black tracking-tight text-gray-900">JobCal</h1>
             <p className="text-gray-700 mt-1">채용 일정 관리</p>
           </div>
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-primary-500 text-gray-900 px-5 py-2.5 rounded-full hover:bg-primary-400 transition-colors shadow-[0_6px_18px_rgba(254,229,0,0.35)]"
-          >
-            <Plus size={20} />
-            공고 추가
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                await authApi.logout();
+                removeAuthToken();
+                setIsAuthenticated(false);
+              }}
+              className="text-sm font-semibold text-gray-700 hover:text-gray-900"
+            >
+              로그아웃
+            </button>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 bg-primary-500 text-gray-900 px-5 py-2.5 rounded-full hover:bg-primary-400 transition-colors shadow-[0_6px_18px_rgba(254,229,0,0.35)]"
+            >
+              <Plus size={20} />
+              공고 추가
+            </button>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-6 border border-[#f4e7a1]">
-          <JobCalendar
-            // 실제 데이터가 없을 때는 예시 데이터로 캘린더 UI를 미리 확인할 수 있게 함
-            applications={applications.length > 0 ? applications : mockApplications}
-            onSelectEvent={handleSelectEvent}
-          />
+          <JobCalendar applications={applications} onSelectEvent={handleSelectEvent} />
         </div>
 
         <div className="mt-6">
