@@ -164,7 +164,6 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         events={events}
         startAccessor="start"
         endAccessor="end"
-        defaultView="month"
         date={currentDate}
         onNavigate={setCurrentDate}
         onSelectEvent={handleSelectEvent}
@@ -175,7 +174,6 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         }}
         showAllEvents
         popup={false}
-        defaultView="month"
         views={['month']}
         className="job-calendar"
         style={{ height: 'auto', minHeight: 600 }}
