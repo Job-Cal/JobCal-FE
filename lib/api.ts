@@ -5,7 +5,7 @@ import { getAuthToken, parseBearerToken, removeAuthToken, setAuthToken } from '@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const OAUTH_START_PATH =
-  process.env.NEXT_PUBLIC_OAUTH_START_PATH || '/oauth2/authorization/cognito';
+  process.env.NEXT_PUBLIC_OAUTH_START_PATH || '/api/oauth2/authorization/cognito';
 
 if (!API_BASE_URL) {
   throw new Error('NEXT_PUBLIC_API_URL is not set. Define it in .env.local');
