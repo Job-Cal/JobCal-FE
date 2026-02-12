@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Plus } from 'lucide-react';
+import { Plus, User } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
 import JobAddModal from '@/components/job/JobAddModal';
 import JobDetailPanel from '@/components/job/JobDetailPanel';
 import { applicationsApi, authApi } from '@/lib/api';
-import { removeAuthToken } from '@/lib/auth';
 import {
   Application,
   ApplicationStatusLabels,
@@ -21,6 +20,22 @@ export default function Home() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!profileMenuRef.current) return;
+      if (event.target instanceof Node && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isProfileMenuOpen]);
 
   const fetchApplications = async (options?: { showLoading?: boolean }) => {
     try {
@@ -52,15 +67,6 @@ export default function Home() {
 
   useEffect(() => {
     const bootstrap = async () => {
-      try {
-        await authApi.fetchAccessToken();
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-      }
       fetchApplications({ showLoading: true });
     };
 
@@ -128,28 +134,53 @@ export default function Home() {
             <h1 className="text-3xl font-black tracking-tight text-slate-900">JobCal</h1>
             <p className="text-slate-600 mt-1">채용 일정 관리</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="relative" ref={profileMenuRef}>
             <button
-              onClick={async () => {
-                await authApi.logout();
-                removeAuthToken();
-                setIsAuthenticated(false);
-              }}
-              className="text-sm font-semibold text-slate-600 hover:text-slate-900"
+              type="button"
+              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors"
+              aria-label="프로필 메뉴"
             >
-              로그아웃
+              <User size={18} />
             </button>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-full hover:bg-primary-500 transition-colors shadow-[0_10px_24px_rgba(37,99,235,0.25)]"
-            >
-              <Plus size={20} />
-              공고 추가
-            </button>
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)] p-2 z-10">
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-xl"
+                >
+                  마이페이지
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsProfileMenuOpen(false);
+                    await authApi.logout();
+                    setIsAuthenticated(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl"
+                >
+                  로그아웃
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="bg-white rounded-3xl shadow-[0_14px_36px_rgba(15,23,42,0.08)] p-6 border border-[#e5edff]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">캘린더</h2>
+              <p className="text-sm text-slate-500">마감일 기준 일정</p>
+            </div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-full hover:bg-primary-500 transition-colors shadow-[0_10px_24px_rgba(37,99,235,0.25)] text-sm font-semibold"
+            >
+              <Plus size={18} />
+              공고 추가
+            </button>
+          </div>
           <JobCalendar applications={applications} onSelectEvent={handleSelectEvent} />
         </div>
 
