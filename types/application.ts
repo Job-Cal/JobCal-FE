@@ -34,10 +34,10 @@ export const ApplicationStatusLabels: Record<ApplicationStatus, string> = {
 
 export const ApplicationStatusColors: Record<ApplicationStatus, string> = {
   [ApplicationStatus.NOT_APPLIED]: '#6b7280',
-  [ApplicationStatus.APPLIED]: '#fee500',
-  [ApplicationStatus.IN_PROGRESS]: '#ffb020',
-  [ApplicationStatus.REJECTED]: '#ff5a5a',
-  [ApplicationStatus.ACCEPTED]: '#34c759',
+  [ApplicationStatus.APPLIED]: '#3b82f6',
+  [ApplicationStatus.IN_PROGRESS]: '#0ea5e9',
+  [ApplicationStatus.REJECTED]: '#ef4444',
+  [ApplicationStatus.ACCEPTED]: '#22c55e',
 };
 
 export const ApplicationStatusStyles: Record<
@@ -51,27 +51,27 @@ export const ApplicationStatusStyles: Record<
     accent: '#9ca3af',
   },
   [ApplicationStatus.APPLIED]: {
-    bg: '#fff7cc',
-    text: '#1a1a1a',
-    border: '#f0de8d',
-    accent: '#fee500',
+    bg: '#eaf2ff',
+    text: '#1d4ed8',
+    border: '#c7dbff',
+    accent: '#3b82f6',
   },
   [ApplicationStatus.IN_PROGRESS]: {
-    bg: '#fff1d6',
-    text: '#7a4a00',
-    border: '#ffd7a0',
-    accent: '#ffb020',
+    bg: '#e8f8ff',
+    text: '#0369a1',
+    border: '#b6e3ff',
+    accent: '#0ea5e9',
   },
   [ApplicationStatus.REJECTED]: {
     bg: '#ffe5e5',
     text: '#b91c1c',
     border: '#fecaca',
-    accent: '#ff5a5a',
+    accent: '#ef4444',
   },
   [ApplicationStatus.ACCEPTED]: {
-    bg: '#e8fff1',
-    text: '#0f7a3a',
-    border: '#b7f3cd',
-    accent: '#34c759',
+    bg: '#e8f7ee',
+    text: '#166534',
+    border: '#c7ebd3',
+    accent: '#22c55e',
   },
 };

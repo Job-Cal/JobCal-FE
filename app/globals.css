@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 26, 26, 26;
-  --background-start-rgb: 255, 247, 204;
+  --foreground-rgb: 17, 24, 39;
+  --background-start-rgb: 244, 248, 255;
   --background-end-rgb: 255, 255, 255;
 }
 
@@ -12,10 +12,16 @@ body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       180deg,
-      rgba(255, 247, 204, 0.9),
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+      rgba(244, 248, 255, 0.95) 0%,
+      rgba(241, 246, 255, 0.9) 45%,
+      rgb(var(--background-end-rgb)) 100%
+    ),
+    radial-gradient(
+      1200px 600px at 10% -10%,
+      rgba(59, 130, 246, 0.12),
+      transparent 60%
+    );
+  background-color: rgb(var(--background-start-rgb));
 }
 
 .job-calendar .rbc-month-view,
@@ -48,20 +54,21 @@ body {
 }
 
 .job-calendar .rbc-toolbar button {
-  border: 1px solid #e3d27a;
-  background: #fff9d9;
-  color: #1a1a1a;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
   border-radius: 999px;
   padding: 6px 12px;
   font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .job-calendar .rbc-toolbar button.rbc-active,
 .job-calendar .rbc-toolbar button:hover {
-  background: #fee500;
-  border-color: #e6cf00;
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
 .job-calendar .rbc-today {
-  background-color: #fff3bf;
+  background-color: #eef4ff;
 }

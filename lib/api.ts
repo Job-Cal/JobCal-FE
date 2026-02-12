@@ -4,20 +4,15 @@ import { Application, ApplicationStatus, ApplicationUpdate } from '@/types/appli
 import { getAuthToken, parseBearerToken, removeAuthToken, setAuthToken } from '@/lib/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-const API_PREFIX = '/api';
-const COGNITO_DOMAIN = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
-const COGNITO_CLIENT_ID = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
-const COGNITO_REDIRECT_URI = process.env.NEXT_PUBLIC_COGNITO_REDIRECT_URI;
-const COGNITO_IDP = process.env.NEXT_PUBLIC_COGNITO_IDP;
-const COGNITO_RESPONSE_TYPE = process.env.NEXT_PUBLIC_COGNITO_RESPONSE_TYPE || 'code';
-const COGNITO_SCOPE = process.env.NEXT_PUBLIC_COGNITO_SCOPE || 'openid+profile+email';
+const OAUTH_START_PATH =
+  process.env.NEXT_PUBLIC_OAUTH_START_PATH || '/oauth2/authorization/cognito';
 
 if (!API_BASE_URL) {
   throw new Error('NEXT_PUBLIC_API_URL is not set. Define it in .env.local');
 }
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL ? `${API_BASE_URL}${API_PREFIX}` : API_BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -114,26 +109,10 @@ export const applicationsApi = {
   },
 };
 
-// Auth (Cognito via BE OAuth2)
-const getCognitoLoginUrl = (): string | null => {
-  if (!COGNITO_DOMAIN || !COGNITO_CLIENT_ID || !COGNITO_REDIRECT_URI) {
-    return null;
-  }
-
-  const url = new URL('/login', COGNITO_DOMAIN);
-  url.searchParams.set('client_id', COGNITO_CLIENT_ID);
-  url.searchParams.set('response_type', COGNITO_RESPONSE_TYPE);
-  url.searchParams.set('scope', COGNITO_SCOPE);
-  url.searchParams.set('redirect_uri', COGNITO_REDIRECT_URI);
-  if (COGNITO_IDP) {
-    url.searchParams.set('identity_provider', COGNITO_IDP);
-  }
-  return url.toString();
-};
+// Auth (start via BE OAuth2 to ensure session cookie is set)
 
 export const authApi = {
-  getLoginUrl: (): string =>
-    getCognitoLoginUrl() ?? `${API_BASE_URL}/oauth2/authorization/cognito`,
+  getLoginUrl: (): string => OAUTH_START_PATH,
   fetchAccessToken: async (): Promise<void> => {
     await apiClient.get('/auth/token');
   },

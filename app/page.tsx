@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { Plus } from 'lucide-react';
+import { Plus, User } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
 import JobAddModal from '@/components/job/JobAddModal';
 import JobDetailPanel from '@/components/job/JobDetailPanel';
 import { applicationsApi, authApi } from '@/lib/api';
-import { removeAuthToken } from '@/lib/auth';
 import {
   Application,
   ApplicationStatusLabels,
@@ -21,6 +20,22 @@ export default function Home() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!profileMenuRef.current) return;
+      if (event.target instanceof Node && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isProfileMenuOpen]);
 
   const fetchApplications = async (options?: { showLoading?: boolean }) => {
     try {
@@ -52,15 +67,6 @@ export default function Home() {
 
   useEffect(() => {
     const bootstrap = async () => {
-      try {
-        await authApi.fetchAccessToken();
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-      }
       fetchApplications({ showLoading: true });
     };
 
@@ -82,7 +88,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-700">로딩 중...</p>
+          <p className="mt-4 text-slate-600">로딩 중...</p>
         </div>
       </div>
     );
@@ -90,10 +96,10 @@ export default function Home() {
 
   if (isAuthenticated === false) {
     return (
-      <main className="min-h-screen bg-[#fffbed] flex items-center justify-center px-4">
-        <div className="w-full max-w-lg bg-white border border-[#f4e7a1] rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-8">
-          <h1 className="text-2xl font-black tracking-tight text-gray-900">로그인이 필요합니다</h1>
-          <p className="text-gray-700 mt-2">
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-lg bg-white/90 backdrop-blur rounded-3xl shadow-[0_18px_50px_rgba(15,23,42,0.12)] p-8 border border-[#e5edff]">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">로그인이 필요합니다</h1>
+          <p className="text-slate-600 mt-2">
             잡칼을 사용하려면 코그니토 로그인이 필요합니다. 아래 버튼을 눌러 로그인해 주세요.
           </p>
           <div className="mt-6 flex flex-col gap-3">
@@ -101,18 +107,18 @@ export default function Home() {
               onClick={() => {
                 window.location.href = authApi.getLoginUrl();
               }}
-              className="w-full bg-primary-500 text-gray-900 px-5 py-3 rounded-full font-bold hover:bg-primary-400 transition-colors shadow-[0_6px_18px_rgba(254,229,0,0.35)]"
+              className="w-full bg-primary-600 text-white px-5 py-3 rounded-full font-semibold hover:bg-primary-500 transition-colors shadow-[0_10px_24px_rgba(37,99,235,0.25)]"
             >
               코그니토로 로그인
             </button>
             <button
               onClick={() => fetchApplications({ showLoading: true })}
-              className="w-full border border-gray-300 text-gray-700 px-5 py-3 rounded-full font-semibold hover:bg-gray-50 transition-colors"
+              className="w-full border border-slate-200 text-slate-700 px-5 py-3 rounded-full font-semibold hover:bg-slate-50 transition-colors"
             >
               다시 시도
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-slate-500 mt-4">
             로그인 완료 후 이 화면으로 다시 돌아오면 자동으로 세션이 인식됩니다.
           </p>
         </div>
@@ -121,63 +127,88 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#fffbed]">
+    <main className="min-h-screen">
       <div className="container mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-gray-900">JobCal</h1>
-            <p className="text-gray-700 mt-1">채용 일정 관리</p>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">JobCal</h1>
+            <p className="text-slate-600 mt-1">채용 일정 관리</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="relative" ref={profileMenuRef}>
             <button
-              onClick={async () => {
-                await authApi.logout();
-                removeAuthToken();
-                setIsAuthenticated(false);
-              }}
-              className="text-sm font-semibold text-gray-700 hover:text-gray-900"
+              type="button"
+              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors"
+              aria-label="프로필 메뉴"
             >
-              로그아웃
+              <User size={18} />
             </button>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 bg-primary-500 text-gray-900 px-5 py-2.5 rounded-full hover:bg-primary-400 transition-colors shadow-[0_6px_18px_rgba(254,229,0,0.35)]"
-            >
-              <Plus size={20} />
-              공고 추가
-            </button>
+            {isProfileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-44 rounded-2xl border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)] p-2 z-10">
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-xl"
+                >
+                  마이페이지
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsProfileMenuOpen(false);
+                    await authApi.logout();
+                    setIsAuthenticated(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 rounded-xl"
+                >
+                  로그아웃
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-6 border border-[#f4e7a1]">
+        <div className="bg-white rounded-3xl shadow-[0_14px_36px_rgba(15,23,42,0.08)] p-6 border border-[#e5edff]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">캘린더</h2>
+              <p className="text-sm text-slate-500">마감일 기준 일정</p>
+            </div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-full hover:bg-primary-500 transition-colors shadow-[0_10px_24px_rgba(37,99,235,0.25)] text-sm font-semibold"
+            >
+              <Plus size={18} />
+              공고 추가
+            </button>
+          </div>
           <JobCalendar applications={applications} onSelectEvent={handleSelectEvent} />
         </div>
 
         <div className="mt-6">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">전체 지원 현황</h2>
-          <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] overflow-hidden border border-[#f4e7a1]">
+          <h2 className="text-xl font-bold mb-4 text-slate-900">전체 지원 현황</h2>
+          <div className="bg-white rounded-3xl shadow-[0_14px_36px_rgba(15,23,42,0.08)] overflow-hidden border border-[#e5edff]">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-[#fff7cc]">
+                <thead className="bg-[#f3f6ff]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       회사명
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       직무
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       마감일
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       상태
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-[#f5eab6]">
+                <tbody className="bg-white divide-y divide-[#edf2ff]">
                   {applications.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-4 text-center text-gray-600">
+                      <td colSpan={4} className="px-6 py-4 text-center text-slate-500">
                         등록된 채용 공고가 없습니다.
                       </td>
                     </tr>
@@ -185,16 +216,16 @@ export default function Home() {
                     applications.map((app) => (
                       <tr
                         key={app.id}
-                        className="hover:bg-[#fff9d9] cursor-pointer transition-colors"
+                        className="hover:bg-[#f6f9ff] cursor-pointer transition-colors"
                         onClick={() => handleSelectEvent(app)}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
                           {app.job_posting.company_name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                           {app.job_posting.job_title}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                           {app.job_posting.deadline
                             ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
                             : '-'}
