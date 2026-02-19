@@ -2,10 +2,14 @@ import axios from 'axios';
 import { JobPosting, JobPostingParseRequest, JobPostingParseResponse, JobPostingCreate } from '@/types/job';
 import { Application, ApplicationStatus, ApplicationUpdate } from '@/types/application';
 import { getAuthToken, parseBearerToken, removeAuthToken, setAuthToken } from '@/lib/auth';
+import { AxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const OAUTH_START_PATH =
   process.env.NEXT_PUBLIC_OAUTH_START_PATH || '/api/oauth2/authorization/cognito';
+const LOGIN_PAGE_PATH = '/login';
+const LOGIN_REDIRECT_GUARD_KEY = '__jobcal_login_redirecting_at__';
+const REFRESH_TOKEN_PATH = '/auth/refresh';
 
 if (!API_BASE_URL) {
   throw new Error('NEXT_PUBLIC_API_URL is not set. Define it in .env.local');
@@ -19,12 +23,81 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-apiClient.interceptors.request.use((config) => {
-  const token = getAuthToken();
-  if (token) {
-    config.headers = config.headers ?? {};
-    config.headers.Authorization = `Bearer ${token}`;
+type RetryableAxiosRequestConfig = AxiosRequestConfig & { _retry?: boolean };
+let refreshTokenPromise: Promise<string | null> | null = null;
+
+const redirectToLogin = () => {
+  if (typeof window === 'undefined') {
+    return;
   }
+
+  const lastRedirectedAt = Number(window.sessionStorage.getItem(LOGIN_REDIRECT_GUARD_KEY) || '0');
+  const now = Date.now();
+  if (now - lastRedirectedAt < 1500) {
+    return;
+  }
+
+  window.sessionStorage.setItem(LOGIN_REDIRECT_GUARD_KEY, String(now));
+  window.location.href = LOGIN_PAGE_PATH;
+};
+
+const isRefreshRequest = (config?: AxiosRequestConfig): boolean => {
+  const requestUrl = `${config?.baseURL ?? ''}${config?.url ?? ''}`;
+  return requestUrl.includes(REFRESH_TOKEN_PATH);
+};
+
+const refreshAccessToken = async (): Promise<string | null> => {
+  if (refreshTokenPromise) {
+    return refreshTokenPromise;
+  }
+
+  refreshTokenPromise = (async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}${REFRESH_TOKEN_PATH}`, {
+        withCredentials: true,
+      });
+
+      const headerValue = response.headers?.authorization ?? response.headers?.Authorization;
+      const tokenFromHeader = parseBearerToken(headerValue);
+      const tokenFromBody =
+        typeof response.data?.accessToken === 'string' ? response.data.accessToken : null;
+      const nextToken = tokenFromHeader ?? tokenFromBody;
+
+      if (!nextToken) {
+        removeAuthToken();
+        return null;
+      }
+
+      setAuthToken(nextToken);
+      return nextToken;
+    } catch {
+      removeAuthToken();
+      return null;
+    } finally {
+      refreshTokenPromise = null;
+    }
+  })();
+
+  return refreshTokenPromise;
+};
+
+apiClient.interceptors.request.use(async (config) => {
+  if (isRefreshRequest(config)) {
+    return config;
+  }
+
+  let token = getAuthToken();
+  if (!token) {
+    token = await refreshAccessToken();
+  }
+
+  if (!token) {
+    redirectToLogin();
+    return Promise.reject(new axios.CanceledError('Missing, expired, or non-refreshable access token'));
+  }
+
+  config.headers = config.headers ?? {};
+  config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -37,9 +110,27 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
     if (error?.response?.status === 401) {
-      removeAuthToken();
+      const originalRequest: RetryableAxiosRequestConfig | undefined = error?.config;
+
+      if (!originalRequest || originalRequest._retry || isRefreshRequest(originalRequest)) {
+        removeAuthToken();
+        redirectToLogin();
+        return Promise.reject(error);
+      }
+
+      originalRequest._retry = true;
+      const refreshedToken = await refreshAccessToken();
+
+      if (!refreshedToken) {
+        redirectToLogin();
+        return Promise.reject(error);
+      }
+
+      originalRequest.headers = originalRequest.headers ?? {};
+      originalRequest.headers.Authorization = `Bearer ${refreshedToken}`;
+      return apiClient(originalRequest);
     }
     return Promise.reject(error);
   }
@@ -114,7 +205,7 @@ export const applicationsApi = {
 export const authApi = {
   getLoginUrl: (): string => OAUTH_START_PATH,
   fetchAccessToken: async (): Promise<void> => {
-    await apiClient.get('/auth/token');
+    await apiClient.get('/auth/refresh');
   },
   logout: async (): Promise<void> => {
     await apiClient.post('/logout');

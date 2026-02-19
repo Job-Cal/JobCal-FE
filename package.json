@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:dev": "env-cmd -f .env.dev next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

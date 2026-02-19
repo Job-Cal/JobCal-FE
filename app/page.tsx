@@ -55,6 +55,8 @@ export default function Home() {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         setIsAuthenticated(false);
+      } else if (axios.isCancel(error)) {
+        setIsAuthenticated(false);
       } else {
         console.error('Failed to fetch applications:', error);
       }
