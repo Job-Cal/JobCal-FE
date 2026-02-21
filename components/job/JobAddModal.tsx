@@ -16,6 +16,21 @@ interface FormData {
   url: string;
 }
 
+const SUPPORTED_URL_ONLY_ERROR = '지원하지 않는 주소입니다. 원티드/인디스워크 URL만 지원합니다.';
+
+const isSupportedJobUrl = (value: string): boolean => {
+  try {
+    const { hostname } = new URL(value);
+    const normalizedHost = hostname.toLowerCase();
+    return normalizedHost === 'wanted.co.kr'
+      || normalizedHost.endsWith('.wanted.co.kr')
+      || normalizedHost === 'inthiswork.com'
+      || normalizedHost.endsWith('.inthiswork.com');
+  } catch {
+    return false;
+  }
+};
+
 export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalProps) {
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -30,6 +45,12 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
     setIsParsing(true);
     setParseError(null);
     setParsedData(null);
+
+    if (!isSupportedJobUrl(data.url)) {
+      setParseError(SUPPORTED_URL_ONLY_ERROR);
+      setIsParsing(false);
+      return;
+    }
 
     try {
       const result = await jobsApi.parse(data.url);
