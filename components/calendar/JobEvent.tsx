@@ -31,10 +31,18 @@ export default function JobEvent({ application, event }: JobEventProps) {
     todayStart.setHours(0, 0, 0, 0);
     return Math.ceil((deadlineEnd.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
   })();
-  const dDayLabel = dayDiff === null ? null : dayDiff <= 0 ? 'D-day' : `D-${dayDiff}`;
-  const dDayToneClass = dayDiff !== null && dayDiff <= 3
-    ? 'border-rose-200 bg-rose-50 text-rose-700'
-    : 'border-[#d9e3ef] bg-[#f6f9fd] text-[#4c627e]';
+  const dDayLabel = dayDiff === null
+    ? null
+    : dayDiff < 0
+      ? '마감'
+      : dayDiff === 0
+        ? 'D-day'
+        : `D-${dayDiff}`;
+  const dDayToneClass = dayDiff !== null && dayDiff < 0
+    ? 'border-slate-200 bg-slate-100 text-slate-600'
+    : dayDiff !== null && dayDiff <= 3
+      ? 'border-rose-200 bg-rose-50 text-rose-700'
+      : 'border-[#d9e3ef] bg-[#f6f9fd] text-[#4c627e]';
   
   return (
     <div

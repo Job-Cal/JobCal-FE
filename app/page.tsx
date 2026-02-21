@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
-import { Plus, User } from 'lucide-react';
+import { CalendarDays, Link2, List, PencilLine, User } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
-import JobAddModal from '@/components/job/JobAddModal';
+import JobAddModal, { AddMode } from '@/components/job/JobAddModal';
 import JobDetailPanel from '@/components/job/JobDetailPanel';
 import { applicationsApi, authApi } from '@/lib/api';
 import {
@@ -24,10 +24,12 @@ interface ToastMessage {
 }
 
 export default function Home() {
+  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addModalMode, setAddModalMode] = useState<AddMode>('parse');
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -107,6 +109,11 @@ export default function Home() {
   const handleCloseDetailPanel = () => {
     setIsDetailPanelOpen(false);
     setSelectedApplication(null);
+  };
+
+  const openAddModal = (mode: AddMode) => {
+    setAddModalMode(mode);
+    setIsAddModalOpen(true);
   };
 
   const filteredApplications = useMemo(() => {
@@ -235,117 +242,153 @@ export default function Home() {
         </div>
 
         <div className="surface-card px-6 pb-6 pt-4">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-lg font-black text-[#132033]">캘린더</h2>
-              <p className="text-sm text-[#58677c]">마감일 기준 일정</p>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex rounded-2xl border border-[#cfd8e3] bg-white/90 p-1">
+              <button
+                type="button"
+                onClick={() => setViewMode('calendar')}
+                aria-label="달력 모드"
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  viewMode === 'calendar'
+                    ? 'bg-[#136fbd] text-white'
+                    : 'text-slate-700 hover:bg-[#eef5fc]'
+                }`}
+              >
+                <CalendarDays size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                aria-label="전체 지원 현황 모드"
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-[#136fbd] text-white'
+                    : 'text-slate-700 hover:bg-[#eef5fc]'
+                }`}
+              >
+                <List size={18} />
+              </button>
             </div>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 rounded-2xl bg-[#136fbd] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0e5a99] shadow-[0_10px_22px_rgba(19,111,189,0.28)]"
-            >
-              <Plus size={18} />
-              공고 추가
-            </button>
-          </div>
-          <JobCalendar applications={applications} onSelectEvent={handleSelectEvent} />
-        </div>
 
-        <div className="mt-6">
-          <h2 className="mb-4 text-xl font-black text-[#132033]">전체 지원 현황</h2>
-          <div className="mb-4 grid gap-3 md:grid-cols-3">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="회사명/직무 검색"
-              className="w-full rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
-            />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as ApplicationStatus | 'ALL')}
-              className="w-full rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 py-2 text-sm text-slate-700 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
-            >
-              <option value="ALL">전체 상태</option>
-              {Object.values(ApplicationStatus).map((status) => (
-                <option key={status} value={status}>
-                  {ApplicationStatusLabels[status]}
-                </option>
-              ))}
-            </select>
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value as 'deadlineAsc' | 'deadlineDesc' | 'companyAsc')}
-              className="w-full rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 py-2 text-sm text-slate-700 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
-            >
-              <option value="deadlineAsc">마감일 빠른순</option>
-              <option value="deadlineDesc">마감일 늦은순</option>
-              <option value="companyAsc">회사명 가나다순</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => openAddModal('parse')}
+                aria-label="URL 파싱 추가"
+                title="URL 파싱 추가"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#136fbd] text-white transition-colors hover:bg-[#0e5a99] shadow-[0_10px_22px_rgba(19,111,189,0.28)]"
+              >
+                <Link2 size={16} />
+              </button>
+              <button
+                onClick={() => openAddModal('manual')}
+                aria-label="수동 추가"
+                title="수동 추가"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/90 text-slate-700 transition-colors hover:bg-[#eef5fc]"
+              >
+                <PencilLine size={16} />
+              </button>
+            </div>
           </div>
-          <div className="surface-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#edf4fb]">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
-                      회사명
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
-                      직무
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
-                      마감일
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
-                      상태
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-[#e6eef8]">
-                  {filteredApplications.length === 0 ? (
+
+          <div className={viewMode === 'calendar' ? 'block' : 'hidden'} aria-hidden={viewMode !== 'calendar'}>
+            <JobCalendar applications={applications} onSelectEvent={handleSelectEvent} />
+          </div>
+
+          <div className={viewMode === 'list' ? 'block' : 'hidden'} aria-hidden={viewMode !== 'list'}>
+            <div className="mb-4 grid gap-3 md:grid-cols-3">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="회사명/직무 검색"
+                className="w-full rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as ApplicationStatus | 'ALL')}
+                className="w-full rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 py-2 text-sm text-slate-700 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
+              >
+                <option value="ALL">전체 상태</option>
+                {Object.values(ApplicationStatus).map((status) => (
+                  <option key={status} value={status}>
+                    {ApplicationStatusLabels[status]}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as 'deadlineAsc' | 'deadlineDesc' | 'companyAsc')}
+                className="w-full rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 py-2 text-sm text-slate-700 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
+              >
+                <option value="deadlineAsc">마감일 빠른순</option>
+                <option value="deadlineDesc">마감일 늦은순</option>
+                <option value="companyAsc">회사명 가나다순</option>
+              </select>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-[#dbe6f2]">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#edf4fb]">
                     <tr>
-                      <td colSpan={4} className="px-6 py-4 text-center text-slate-500">
-                        {applications.length === 0
-                          ? '등록된 채용 공고가 없습니다.'
-                          : '현재 필터 조건에 맞는 공고가 없습니다.'}
-                      </td>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
+                        회사명
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
+                        직무
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
+                        마감일
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
+                        상태
+                      </th>
                     </tr>
-                  ) : (
-                    filteredApplications.map((app) => (
-                      <tr
-                        key={app.id}
-                        className="cursor-pointer transition-colors hover:bg-[#f2f7fd]"
-                        onClick={() => handleSelectEvent(app)}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
-                          {app.job_posting.company_name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          {app.job_posting.job_title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          {app.job_posting.deadline
-                            ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
-                            : '-'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className="px-2 py-1 text-xs font-bold rounded-full"
-                            style={{
-                              backgroundColor: ApplicationStatusStyles[app.status].bg,
-                              color: ApplicationStatusStyles[app.status].text,
-                              border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
-                            }}
-                          >
-                            {ApplicationStatusLabels[app.status]}
-                          </span>
+                  </thead>
+                  <tbody className="divide-y divide-[#e6eef8] bg-white">
+                    {filteredApplications.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-4 text-center text-slate-500">
+                          {applications.length === 0
+                            ? '등록된 채용 공고가 없습니다.'
+                            : '현재 필터 조건에 맞는 공고가 없습니다.'}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      filteredApplications.map((app) => (
+                        <tr
+                          key={app.id}
+                          className="cursor-pointer transition-colors hover:bg-[#f2f7fd]"
+                          onClick={() => handleSelectEvent(app)}
+                        >
+                          <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900">
+                            {app.job_posting.company_name}
+                          </td>
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                            {app.job_posting.job_title}
+                          </td>
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                            {app.job_posting.deadline
+                              ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
+                              : '-'}
+                          </td>
+                          <td className="whitespace-nowrap px-6 py-4">
+                            <span
+                              className="rounded-full px-2 py-1 text-xs font-bold"
+                              style={{
+                                backgroundColor: ApplicationStatusStyles[app.status].bg,
+                                color: ApplicationStatusStyles[app.status].text,
+                                border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
+                              }}
+                            >
+                              {ApplicationStatusLabels[app.status]}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -355,6 +398,7 @@ export default function Home() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={() => fetchApplications({ showLoading: true })}
+        initialMode={addModalMode}
         onNotify={showToast}
       />
 

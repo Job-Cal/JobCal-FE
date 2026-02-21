@@ -189,9 +189,9 @@ export const applicationsApi = {
     return normalizeApplication(response.data);
   },
 
-  updateStatus: async (id: number, updateData: ApplicationUpdate): Promise<Application> => {
+  update: async (id: number, updateData: ApplicationUpdate): Promise<Application> => {
     const response = await apiClient.patch<Application>(`/applications/${id}/status`, updateData);
-    console.log('updateStatus response:', response.data);
+    console.log('application update response:', response.data);
     return normalizeApplication(response.data);
   },
 

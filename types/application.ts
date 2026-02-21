@@ -22,6 +22,7 @@ export interface Application {
 export interface ApplicationUpdate {
   status?: ApplicationStatus;
   memo?: string | null;
+  deadline?: string | null;
 }
 
 export const ApplicationStatusLabels: Record<ApplicationStatus, string> = {
