@@ -1,12 +1,11 @@
 'use client';
 
-import { Calendar, momentLocalizer, View, Event } from 'react-big-calendar';
+import { Calendar, momentLocalizer, Event } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Application } from '@/types/application';
-import { ApplicationStatusStyles } from '@/types/application';
 import { useState } from 'react';
-import { CalendarCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import JobEvent from './JobEvent';
 
 // Extend Event type to include our custom properties
@@ -30,6 +29,7 @@ interface JobCalendarProps {
 
 export default function JobCalendar({ applications, onSelectEvent }: JobCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const formattedMonthLabel = moment(currentDate).format('YYYY.MM');
 
   // Convert applications to calendar events
   const events = applications
@@ -117,38 +117,31 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
   };
 
 
-  const Toolbar = ({ label, onNavigate }: { label: string; onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY') => void }) => (
-    <div className="rbc-toolbar">
-      <span className="rbc-toolbar-label">{label}</span>
-      <span className="rbc-btn-group flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => onNavigate('PREV')}
-          aria-label="이전"
-          title="이전"
-          className="flex h-9 w-9 items-center justify-center"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <button
-          type="button"
-          onClick={() => onNavigate('TODAY')}
-          aria-label="오늘"
-          title="오늘"
-          className="flex h-9 w-9 items-center justify-center"
-        >
-          <CalendarCheck size={18} />
-        </button>
-        <button
-          type="button"
-          onClick={() => onNavigate('NEXT')}
-          aria-label="다음"
-          title="다음"
-          className="flex h-9 w-9 items-center justify-center"
-        >
-          <ChevronRight size={18} />
-        </button>
+  const Toolbar = ({ onNavigate }: { label: string; onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY') => void }) => (
+    <div className="rbc-toolbar -mt-10 mb-5">
+      <div className="inline-flex w-full items-center justify-center">
+      <button
+        type="button"
+        onClick={() => onNavigate('PREV')}
+        aria-label="이전"
+        title="이전"
+        className="!border-0 !bg-transparent !p-0 !rounded-none text-[#4c627e] transition-colors hover:text-[#2b4f78] hover:!bg-transparent"
+      >
+        <ChevronLeft size={18} />
+      </button>
+      <span className="mx-[14px] px-0 text-center text-[20px] font-black leading-none tracking-tight text-[#132033]">
+        {formattedMonthLabel}
       </span>
+      <button
+        type="button"
+        onClick={() => onNavigate('NEXT')}
+        aria-label="다음"
+        title="다음"
+        className="!border-0 !bg-transparent !p-0 !rounded-none text-[#4c627e] transition-colors hover:text-[#2b4f78] hover:!bg-transparent"
+      >
+        <ChevronRight size={18} />
+      </button>
+      </div>
     </div>
   );
 

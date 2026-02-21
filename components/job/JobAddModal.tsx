@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { X, Loader2 } from 'lucide-react';
-import { jobsApi, applicationsApi } from '@/lib/api';
+import { jobsApi } from '@/lib/api';
 import { JobPostingCreate } from '@/types/job';
 
 interface JobAddModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onNotify?: (type: 'success' | 'error', message: string) => void;
 }
 
 interface FormData {
@@ -31,13 +32,66 @@ const isSupportedJobUrl = (value: string): boolean => {
   }
 };
 
-export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalProps) {
+export default function JobAddModal({ isOpen, onClose, onSuccess, onNotify }: JobAddModalProps) {
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [parsedData, setParsedData] = useState<JobPostingCreate | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const previousFocusedElementRef = useRef<HTMLElement | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>();
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    previousFocusedElementRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+    const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    focusableElements?.[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!modalRef.current) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const nodes = modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (nodes.length === 0) return;
+
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocusedElementRef.current?.focus();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -48,6 +102,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
 
     if (!isSupportedJobUrl(data.url)) {
       setParseError(SUPPORTED_URL_ONLY_ERROR);
+      onNotify?.('error', SUPPORTED_URL_ONLY_ERROR);
       setIsParsing(false);
       return;
     }
@@ -58,10 +113,14 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
       if (result.success && result.data) {
         setParsedData(result.data);
       } else {
-        setParseError(result.error || '파싱에 실패했습니다.');
+        const message = result.error || '파싱에 실패했습니다.';
+        setParseError(message);
+        onNotify?.('error', message);
       }
     } catch (error: any) {
-      setParseError(error.response?.data?.detail || '파싱 중 오류가 발생했습니다.');
+      const message = error.response?.data?.detail || '파싱 중 오류가 발생했습니다.';
+      setParseError(message);
+      onNotify?.('error', message);
     } finally {
       setIsParsing(false);
     }
@@ -84,10 +143,13 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
       setParsedData(null);
       setParseError(null);
       onSuccess();
+      onNotify?.('success', '채용 공고를 저장했습니다.');
       onClose();
     } catch (error: any) {
       console.error('❌ Error saving job:', error);
-      setParseError(error.response?.data?.detail || '저장 중 오류가 발생했습니다.');
+      const message = error.response?.data?.detail || '저장 중 오류가 발생했습니다.';
+      setParseError(message);
+      onNotify?.('error', message);
     } finally {
       setIsSaving(false);
     }
@@ -106,13 +168,25 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-[4px] flex items-center justify-center z-50">
-      <div className="bg-white rounded-3xl shadow-[0_22px_60px_rgba(15,23,42,0.25)] w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#e5edff]">
-        <div className="flex items-center justify-between p-6 border-b bg-[#f3f6ff]">
-          <h2 className="text-2xl font-extrabold text-slate-900">채용 공고 추가</h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-[4px]"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="채용 공고 추가"
+        onClick={(event) => event.stopPropagation()}
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[#cfd8e3] bg-white/95 shadow-[0_22px_60px_rgba(15,23,42,0.25)]"
+      >
+        <div className="flex items-center justify-between border-b border-[#dbe6f2] bg-[#edf4fb] p-6">
+          <h2 className="text-2xl font-extrabold text-[#132033]">채용 공고 추가</h2>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-800"
+            className="text-slate-500 transition-colors hover:text-[#132033]"
+            aria-label="닫기"
           >
             <X size={24} />
           </button>
@@ -129,7 +203,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                   id="url"
                   type="url"
                   {...register('url', { required: 'URL을 입력해주세요.' })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+                  className="w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2 focus:border-[#136fbd] focus:outline-none focus:ring-2 focus:ring-[#9dcff9]"
                   placeholder="https://www.wanted.co.kr/wd/..."
                 />
                 {errors.url && (
@@ -138,12 +212,12 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
               </div>
 
               {parseError && (
-                <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl">
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
                   <p className="text-sm text-rose-600">{parseError}</p>
                   <button
                     type="button"
                     onClick={handleManualInput}
-                    className="mt-2 text-sm text-rose-600 hover:text-rose-800 underline"
+                    className="mt-2 text-sm text-rose-700 underline hover:text-rose-900"
                   >
                     수동으로 입력하기
                   </button>
@@ -154,7 +228,8 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <button
                   type="submit"
                   disabled={isParsing}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-full hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_10px_22px_rgba(37,99,235,0.25)]"
+                  data-autofocus
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#136fbd] px-4 py-2 text-white shadow-[0_10px_22px_rgba(19,111,189,0.25)] transition-colors hover:bg-[#0e5a99] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isParsing ? (
                     <>
@@ -168,7 +243,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 border border-slate-200 rounded-full hover:bg-slate-50"
+                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd]"
                 >
                   취소
                 </button>
@@ -184,7 +259,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                   type="text"
                   value={parsedData.company_name}
                   onChange={(e) => setParsedData({ ...parsedData, company_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white"
+                  className="w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2"
                 />
               </div>
 
@@ -196,7 +271,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                   type="text"
                   value={parsedData.job_title}
                   onChange={(e) => setParsedData({ ...parsedData, job_title: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white"
+                  className="w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2"
                 />
               </div>
 
@@ -212,7 +287,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                     console.log('📅 Deadline changed:', newDeadline);
                     setParsedData({ ...parsedData, deadline: newDeadline });
                   }}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white"
+                  className="w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2"
                   required
                 />
                 {!parsedData.deadline && (
@@ -230,7 +305,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                   type="url"
                   value={parsedData.original_url}
                   onChange={(e) => setParsedData({ ...parsedData, original_url: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white"
+                  className="w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2"
                 />
               </div>
 
@@ -242,7 +317,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                   type="text"
                   value={parsedData.location || ''}
                   onChange={(e) => setParsedData({ ...parsedData, location: e.target.value || null })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl bg-white"
+                  className="w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2"
                   placeholder="예: 서울 강남구"
                 />
               </div>
@@ -254,13 +329,13 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <textarea
                   value={parsedData.description || ''}
                   onChange={(e) => setParsedData({ ...parsedData, description: e.target.value || null })}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white min-h-[140px]"
+                  className="min-h-[140px] w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-3"
                   placeholder="파싱된 공고 설명/요건이 여기에 표시됩니다."
                 />
               </div>
 
               {!parsedData.deadline && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
                   <p className="text-sm text-amber-700">
                     ⚠️ 마감일이 없습니다. 캘린더에 표시하려면 마감일을 입력해주세요.
                   </p>
@@ -271,7 +346,7 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                 <button
                   onClick={handleSave}
                   disabled={isSaving || !parsedData.company_name || !parsedData.job_title}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-full hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_10px_22px_rgba(37,99,235,0.25)]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#136fbd] px-4 py-2 text-white shadow-[0_10px_22px_rgba(19,111,189,0.25)] transition-colors hover:bg-[#0e5a99] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSaving ? (
                     <>
@@ -287,13 +362,13 @@ export default function JobAddModal({ isOpen, onClose, onSuccess }: JobAddModalP
                     setParsedData(null);
                     setParseError(null);
                   }}
-                  className="px-4 py-2 border border-slate-200 rounded-full hover:bg-slate-50"
+                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd]"
                 >
                   다시 파싱
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 border border-slate-200 rounded-full hover:bg-slate-50"
+                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd]"
                 >
                   취소
                 </button>
