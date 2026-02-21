@@ -7,6 +7,11 @@ const notoSansKr = Noto_Sans_KR({ subsets: ['latin'], weight: ['400', '500', '70
 export const metadata: Metadata = {
   title: 'JobCal - 채용 일정 관리',
   description: '개인 취준생용 채용 일정 관리 서비스',
+  icons: {
+    icon: '/jobcal-logo.png',
+    shortcut: '/jobcal-logo.png',
+    apple: '/jobcal-logo.png',
+  },
 }
 
 export default function RootLayout({

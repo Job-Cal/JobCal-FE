@@ -3,25 +3,46 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 17, 24, 39;
-  --background-start-rgb: 244, 248, 255;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 19, 32, 51;
+  --bg-base-rgb: 241, 246, 253;
+  --surface-rgb: 255, 255, 255;
+  --line-rgb: 207, 220, 236;
+  --ink-soft-rgb: 76, 98, 126;
+  --brand-rgb: 24, 104, 181;
+  --brand-strong-rgb: 15, 75, 136;
+  --accent-rgb: 24, 104, 181;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      180deg,
-      rgba(244, 248, 255, 0.95) 0%,
-      rgba(241, 246, 255, 0.9) 45%,
-      rgb(var(--background-end-rgb)) 100%
+  background:
+    radial-gradient(
+      1000px 460px at 8% -8%,
+      rgba(var(--accent-rgb), 0.2),
+      transparent 62%
     ),
     radial-gradient(
-      1200px 600px at 10% -10%,
-      rgba(59, 130, 246, 0.12),
-      transparent 60%
+      900px 420px at 95% 4%,
+      rgba(var(--brand-rgb), 0.22),
+      transparent 62%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--bg-base-rgb), 0.94) 0%,
+      rgba(var(--bg-base-rgb), 0.9) 52%,
+      rgba(255, 255, 255, 0.9) 100%
+    ),
+    radial-gradient(
+      1200px 600px at 18% 105%,
+      rgba(var(--brand-rgb), 0.1),
+      transparent 70%
     );
-  background-color: rgb(var(--background-start-rgb));
+  background-color: rgb(var(--bg-base-rgb));
+}
+
+::selection {
+  background: rgba(var(--brand-rgb), 0.18);
+  color: rgb(var(--foreground-rgb));
 }
 
 .job-calendar .rbc-month-view,
@@ -46,29 +67,126 @@ body {
 }
 
 .job-calendar .rbc-month-row {
-  min-height: 140px;
+  min-height: 128px;
 }
 
 .job-calendar .rbc-row-content {
-  padding-bottom: 6px;
+  padding-bottom: 4px;
+}
+
+.job-calendar .rbc-calendar {
+  font-size: 14px;
+}
+
+.job-calendar .rbc-month-view {
+  border: 1px solid rgba(var(--line-rgb), 0.92);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(var(--surface-rgb), 1);
+}
+
+.job-calendar .rbc-header {
+  border-bottom: 1px solid rgba(var(--line-rgb), 0.9);
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(var(--ink-soft-rgb), 0.95);
+  letter-spacing: 0;
+}
+
+.job-calendar .rbc-header:first-child,
+.job-calendar .rbc-header:last-child {
+  color: #5f7390;
+}
+
+.job-calendar .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid rgba(var(--line-rgb), 0.65);
+}
+
+.job-calendar .rbc-month-row + .rbc-month-row {
+  border-top: 1px solid rgba(var(--line-rgb), 0.65);
+}
+
+.job-calendar .rbc-date-cell {
+  padding-right: 6px;
+  padding-top: 4px;
+}
+
+.job-calendar .rbc-date-cell > a {
+  color: #556f90;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.job-calendar .rbc-date-cell.rbc-now > a {
+  background: #1e6bb6;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.job-calendar .rbc-off-range-bg {
+  background: rgba(214, 226, 241, 0.3);
+}
+
+.job-calendar .rbc-off-range .rbc-button-link {
+  color: rgba(var(--ink-soft-rgb), 0.45);
 }
 
 .job-calendar .rbc-toolbar button {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #0f172a;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-weight: 600;
+  border: 1px solid rgba(var(--line-rgb), 0.95);
+  background: rgba(var(--surface-rgb), 1);
+  color: #4c627e;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 700;
   transition: all 0.2s ease;
 }
 
 .job-calendar .rbc-toolbar button.rbc-active,
 .job-calendar .rbc-toolbar button:hover {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: #f4f8fd;
+  border-color: rgba(var(--brand-rgb), 0.32);
+  color: #2b4f78;
 }
 
 .job-calendar .rbc-today {
-  background-color: #eef4ff;
+  background-color: #f3f8ff;
+}
+
+.job-calendar .rbc-day-bg {
+  transition: background-color 0.16s ease;
+}
+
+.job-calendar .rbc-day-bg:hover {
+  background-color: #f7fbff;
+}
+
+.job-calendar .rbc-row-segment {
+  padding: 0 3px 2px 3px;
+}
+
+.job-calendar .rbc-show-more {
+  color: #3d6290;
+  font-weight: 700;
+  background: transparent;
+  font-size: 11px;
+}
+
+.surface-card {
+  border: 1px solid rgba(var(--line-rgb), 0.9);
+  background: linear-gradient(160deg, rgba(var(--surface-rgb), 0.95), rgba(244, 249, 255, 0.92));
+  border-radius: 24px;
+  box-shadow: 0 14px 36px rgba(54, 60, 74, 0.08);
+}
+
+.soft-panel {
+  border: 1px solid rgba(var(--line-rgb), 0.8);
+  background: rgba(var(--surface-rgb), 0.78);
+  border-radius: 16px;
 }
