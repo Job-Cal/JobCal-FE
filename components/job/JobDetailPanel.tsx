@@ -238,17 +238,32 @@ export default function JobDetailPanel({
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto bg-[#f4f8fc] p-6">
-          <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Building2 size={20} className="text-slate-500" />
-              <h3 className="text-lg font-bold text-slate-900">{application.job_posting.company_name}</h3>
+        <div className="flex-1 space-y-4 overflow-y-auto bg-[#eef4fb] p-6">
+          <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+            <div className="mb-2 flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Building2 size={20} className="text-slate-500" />
+                <h3 className="text-lg font-bold text-slate-900">{application.job_posting.company_name}</h3>
+              </div>
+              <span
+                className="rounded-full px-2 py-1 text-[11px] font-bold"
+                style={{
+                  backgroundColor: ApplicationStatusStyles[currentStatus].bg,
+                  color: ApplicationStatusStyles[currentStatus].text,
+                  border: `1px solid ${ApplicationStatusStyles[currentStatus].border}`,
+                }}
+              >
+                {ApplicationStatusLabels[currentStatus]}
+              </span>
             </div>
             <p className="text-[15px] text-slate-700">{application.job_posting.job_title}</p>
           </div>
 
-          <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
-            <label className="mb-2 block text-sm font-semibold text-slate-700">마감일</label>
+          <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+            <div className="mb-2">
+              <label className="text-sm font-bold text-[#2e435a]">마감일</label>
+              <div className="mt-1 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+            </div>
             <div className="relative">
               <button
                 type="button"
@@ -333,10 +348,11 @@ export default function JobDetailPanel({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              지원 상태
-            </label>
+          <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+            <div className="mb-2">
+              <label className="text-sm font-bold text-[#2e435a]">지원 상태</label>
+              <div className="mt-1 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+            </div>
             <div className="space-y-2">
               <button
                 type="button"
@@ -385,19 +401,21 @@ export default function JobDetailPanel({
           </div>
 
           {application.job_posting.location && (
-            <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
-                근무지역
-              </label>
+            <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+              <div className="mb-1">
+                <label className="text-sm font-bold text-[#2e435a]">근무지역</label>
+                <div className="mt-1 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+              </div>
               <p className="text-slate-700">{application.job_posting.location}</p>
             </div>
           )}
 
           {application.job_posting.description && (
-            <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
-                설명
-              </label>
+            <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+              <div className="mb-1">
+                <label className="text-sm font-bold text-[#2e435a]">설명</label>
+                <div className="mt-1 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+              </div>
               <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
                 {application.job_posting.description}
               </p>
@@ -405,20 +423,21 @@ export default function JobDetailPanel({
           )}
 
           {application.memo && (
-            <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-1">
-                메모
-              </label>
+            <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+              <div className="mb-1">
+                <label className="text-sm font-bold text-[#2e435a]">메모</label>
+                <div className="mt-1 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+              </div>
               <p className="text-sm leading-6 text-slate-700">{application.memo}</p>
             </div>
           )}
 
-          <div className="rounded-2xl border border-[#dbe6f2] bg-white p-4">
+          <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
             <a
               href={application.job_posting.original_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-slate-900 underline decoration-[#136fbd] hover:text-[#136fbd]"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#d3e2f2] bg-[#f7fbff] px-3 py-2 text-sm font-semibold text-[#20456b] transition-colors hover:bg-[#edf4fb]"
             >
               <ExternalLink size={16} />
               원본 공고 보기
