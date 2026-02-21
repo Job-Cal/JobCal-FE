@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { JobPosting, JobPostingParseRequest, JobPostingParseResponse, JobPostingCreate } from '@/types/job';
 import { Application, ApplicationStatus, ApplicationUpdate } from '@/types/application';
+import { FeedbackCreateRequest } from '@/types/feedback';
 import { getAuthToken, parseBearerToken, removeAuthToken, setAuthToken } from '@/lib/auth';
 import { AxiosRequestConfig } from 'axios';
 
@@ -197,6 +198,12 @@ export const applicationsApi = {
 
   delete: async (id: number): Promise<void> => {
     await apiClient.delete(`/applications/${id}`);
+  },
+};
+
+export const feedbackApi = {
+  create: async (payload: FeedbackCreateRequest): Promise<void> => {
+    await apiClient.post('/feedback', payload);
   },
 };
 

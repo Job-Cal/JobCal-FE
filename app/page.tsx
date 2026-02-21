@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
-import { CalendarDays, Link2, List, PencilLine, User } from 'lucide-react';
+import { CalendarDays, Link2, List, MessageSquareMore, PencilLine, User } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
 import JobAddModal, { AddMode } from '@/components/job/JobAddModal';
 import JobDetailPanel from '@/components/job/JobDetailPanel';
-import { applicationsApi, authApi } from '@/lib/api';
+import FeedbackModal from '@/components/common/FeedbackModal';
+import { applicationsApi, authApi, feedbackApi } from '@/lib/api';
 import {
   Application,
   ApplicationStatus,
@@ -30,6 +31,8 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalMode, setAddModalMode] = useState<AddMode>('parse');
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isFeedbackSubmitting, setIsFeedbackSubmitting] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -208,15 +211,25 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="relative" ref={profileMenuRef}>
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+              onClick={() => setIsFeedbackModalOpen(true)}
               className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
-              aria-label="프로필 메뉴"
+              aria-label="피드백 보내기"
+              title="피드백 보내기"
             >
-              <User size={18} />
+              <MessageSquareMore size={18} />
             </button>
+            <div className="relative" ref={profileMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
+                aria-label="프로필 메뉴"
+              >
+                <User size={18} />
+              </button>
             {isProfileMenuOpen && (
               <div className="absolute right-0 z-10 mt-2 w-44 rounded-2xl border border-[#cfd8e3] bg-white/95 p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
                 <button
@@ -238,6 +251,7 @@ export default function Home() {
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
 
@@ -408,6 +422,29 @@ export default function Home() {
         onClose={handleCloseDetailPanel}
         onUpdate={() => fetchApplications({ showLoading: false })}
         onNotify={showToast}
+      />
+
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        isSubmitting={isFeedbackSubmitting}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        onSubmit={async (payload) => {
+          try {
+            setIsFeedbackSubmitting(true);
+            await feedbackApi.create({
+              category: payload.category,
+              message: payload.message,
+              pagePath: typeof window !== 'undefined' ? window.location.pathname : '/',
+            });
+            setIsFeedbackModalOpen(false);
+            showToast('success', '피드백이 전송되었습니다. 감사합니다.');
+          } catch (error) {
+            console.error('Failed to send feedback:', error);
+            showToast('error', '피드백 전송에 실패했습니다.');
+          } finally {
+            setIsFeedbackSubmitting(false);
+          }
+        }}
       />
 
       <div className="fixed right-4 top-4 z-[70] space-y-2">
