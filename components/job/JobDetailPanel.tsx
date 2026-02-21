@@ -3,7 +3,7 @@
 import { Application, ApplicationStatus, ApplicationStatusLabels, ApplicationStatusStyles } from '@/types/application';
 import { applicationsApi } from '@/lib/api';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, ExternalLink, Calendar, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ExternalLink, Calendar, Building2, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 
 interface JobDetailPanelProps {
   application: Application | null;
@@ -50,6 +50,27 @@ const toKoreanDateLabel = (value: string): string => {
     day: 'numeric',
     weekday: 'short',
   });
+};
+
+const getSourceSiteLabel = (url: string): string => {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    if (host.includes('wanted.co.kr')) return '원티드';
+    if (host.includes('inthiswork.com')) return '인디스워크';
+    if (host.includes('jobkorea.co.kr')) return '잡코리아';
+    if (host.includes('saramin.co.kr')) return '사람인';
+    return host;
+  } catch {
+    return '알 수 없음';
+  }
+};
+
+const getSourceDomain = (url: string): string => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '-';
+  }
 };
 
 export default function JobDetailPanel({
@@ -211,6 +232,8 @@ export default function JobDetailPanel({
   }, [viewMonth, deadlineInput]);
 
   if (!isOpen || !application) return null;
+  const sourceSiteLabel = getSourceSiteLabel(application.job_posting.original_url);
+  const sourceDomain = getSourceDomain(application.job_posting.original_url);
 
   return (
     <div
@@ -433,15 +456,24 @@ export default function JobDetailPanel({
           )}
 
           <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-[#d3e2f2] bg-[#f7fbff] px-3 py-1.5">
+                <Globe size={13} className="text-[#5b7593]" />
+                <span className="rounded-md bg-[#136fbd] px-2 py-0.5 text-[11px] font-bold text-white">
+                  {sourceSiteLabel}
+                </span>
+                <span className="text-xs font-semibold text-[#5a6e86]">{sourceDomain}</span>
+              </div>
             <a
               href={application.job_posting.original_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-[#d3e2f2] bg-[#f7fbff] px-3 py-2 text-sm font-semibold text-[#20456b] transition-colors hover:bg-[#edf4fb]"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#c8daee] bg-white px-3 py-2 text-sm font-semibold text-[#1f476f] shadow-[0_4px_12px_rgba(19,111,189,0.12)] transition-colors hover:bg-[#edf4fb]"
             >
               <ExternalLink size={16} />
               원본 공고 보기
             </a>
+            </div>
           </div>
         </div>
 
