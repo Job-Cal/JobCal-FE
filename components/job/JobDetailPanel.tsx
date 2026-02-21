@@ -4,6 +4,7 @@ import { Application, ApplicationStatus, ApplicationStatusLabels, ApplicationSta
 import { applicationsApi } from '@/lib/api';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ExternalLink, Calendar, Building2, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface JobDetailPanelProps {
   application: Application | null;
@@ -87,6 +88,7 @@ export default function JobDetailPanel({
   const [isDeadlineSaving, setIsDeadlineSaving] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState<Date>(toMonthStart(new Date()));
+  const [showRawDescription, setShowRawDescription] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const previousFocusedElementRef = useRef<HTMLElement | null>(null);
 
@@ -99,6 +101,7 @@ export default function JobDetailPanel({
     setCurrentStatus(application.status);
     const normalized = toDateInputValue(application.job_posting.deadline);
     setDeadlineInput(normalized);
+    setShowRawDescription(false);
     const selectedDate = fromDateInputValue(normalized);
     setViewMonth(toMonthStart(selectedDate ?? new Date()));
   }, [appId, appStatus, appDeadline]);
@@ -234,6 +237,10 @@ export default function JobDetailPanel({
   if (!isOpen || !application) return null;
   const sourceSiteLabel = getSourceSiteLabel(application.job_posting.original_url);
   const sourceDomain = getSourceDomain(application.job_posting.original_url);
+  const hasRawDescription = !!application.job_posting.description_raw;
+  const renderedDescription = showRawDescription && hasRawDescription
+    ? application.job_posting.description_raw
+    : application.job_posting.description;
 
   return (
     <div
@@ -433,15 +440,34 @@ export default function JobDetailPanel({
             </div>
           )}
 
-          {application.job_posting.description && (
+          {renderedDescription && (
             <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
-              <div className="mb-1">
+              <div className="mb-2 flex items-center justify-between gap-2">
                 <label className="text-sm font-bold text-[#2e435a]">설명</label>
-                <div className="mt-1 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+                {hasRawDescription && (
+                  <button
+                    type="button"
+                    onClick={() => setShowRawDescription((prev) => !prev)}
+                    className="rounded-lg border border-[#c9d9ea] bg-[#f7fbff] px-2 py-1 text-xs font-semibold text-[#3c5d7d] hover:bg-[#edf4fb]"
+                  >
+                    {showRawDescription ? '정리본 보기' : '원문 보기'}
+                  </button>
+                )}
               </div>
-              <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                {application.job_posting.description}
-              </p>
+              <div className="mb-2 h-px w-full bg-[#d2deec]" aria-hidden="true" />
+              <div className="text-sm leading-6 text-slate-700">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-2 whitespace-pre-wrap last:mb-0">{children}</p>,
+                    ul: ({ children }) => <ul className="mb-2 list-disc pl-5 last:mb-0">{children}</ul>,
+                    ol: ({ children }) => <ol className="mb-2 list-decimal pl-5 last:mb-0">{children}</ol>,
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                    strong: ({ children }) => <strong className="font-semibold text-slate-800">{children}</strong>,
+                  }}
+                >
+                  {renderedDescription}
+                </ReactMarkdown>
+              </div>
             </div>
           )}
 

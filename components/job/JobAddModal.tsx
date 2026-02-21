@@ -83,6 +83,7 @@ export default function JobAddModal({
     deadline: null,
     original_url: '',
     description: null,
+    description_raw: null,
     location: null,
   });
 

@@ -6,6 +6,7 @@ export interface JobPosting {
   original_url: string;
   parsed_data: Record<string, any> | null;
   description: string | null;
+  description_raw: string | null;
   location: string | null;
   created_at: string;
   updated_at: string | null;
@@ -28,6 +29,6 @@ export interface JobPostingCreate {
   original_url: string;
   parsed_data?: Record<string, any>;
   description?: string | null;
+  description_raw?: string | null;
   location?: string | null;
 }
-
