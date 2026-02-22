@@ -1,19 +1,54 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      router.replace('/');
-    }
+    let isMounted = true;
+
+    const bootstrap = async () => {
+      const token = getAuthToken();
+      if (token) {
+        router.replace('/');
+        return;
+      }
+
+      const refreshed = await authApi.fetchAccessToken();
+      if (refreshed) {
+        router.replace('/');
+        return;
+      }
+
+      if (isMounted) {
+        setIsBootstrapping(false);
+      }
+    };
+
+    bootstrap();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
+
+  if (isBootstrapping) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="surface-card w-full max-w-lg p-8">
+          <h1 className="text-3xl font-black tracking-tight text-[#132033]">세션 확인 중</h1>
+          <p className="mt-2 text-slate-600">
+            로그인 정보를 확인하고 있습니다. 잠시만 기다려 주세요.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4">

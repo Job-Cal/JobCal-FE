@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { CalendarDays, Link2, List, MessageSquareMore, PencilLine, User } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
 import JobAddModal, { AddMode } from '@/components/job/JobAddModal';
@@ -25,6 +26,7 @@ interface ToastMessage {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,6 +106,12 @@ export default function Home() {
     bootstrap();
   }, []);
 
+  useEffect(() => {
+    if (isAuthenticated === false) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
   const handleSelectEvent = (application: Application) => {
     setSelectedApplication(application);
     setIsDetailPanelOpen(true);
@@ -160,35 +168,7 @@ export default function Home() {
   }
 
   if (isAuthenticated === false) {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="surface-card w-full max-w-lg p-8">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">로그인이 필요합니다</h1>
-          <p className="mt-2 text-slate-600">
-            잡칼을 사용하려면 로그인이 필요합니다. 구글 계정으로 빠르게 시작할 수 있습니다.
-          </p>
-          <div className="mt-6 flex flex-col gap-3">
-            <button
-              onClick={() => {
-                window.location.href = authApi.getLoginUrl();
-              }}
-              className="w-full rounded-2xl border border-[#d1d5db] bg-white px-5 py-3 font-semibold text-[#111827] transition-colors hover:bg-[#f9fafb] shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
-            >
-              Google로 계속하기
-            </button>
-            <button
-              onClick={() => fetchApplications({ showLoading: true })}
-              className="w-full rounded-2xl border border-[#cfd8e3] bg-white/80 px-5 py-3 font-semibold text-slate-700 transition-colors hover:bg-white"
-            >
-              다시 시도
-            </button>
-          </div>
-          <p className="text-xs text-slate-500 mt-4">
-            로그인 완료 후 이 화면으로 다시 돌아오면 자동으로 세션이 인식됩니다.
-          </p>
-        </div>
-      </main>
-    );
+    return null;
   }
 
   return (

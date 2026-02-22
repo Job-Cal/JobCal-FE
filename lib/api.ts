@@ -226,8 +226,9 @@ export const authApi = {
     const logoutUri = `${window.location.origin}${LOGIN_PAGE_PATH}`;
     return `${domain}/logout?client_id=${encodeURIComponent(COGNITO_CLIENT_ID)}&logout_uri=${encodeURIComponent(logoutUri)}`;
   },
-  fetchAccessToken: async (): Promise<void> => {
-    await apiClient.get('/auth/refresh');
+  fetchAccessToken: async (): Promise<boolean> => {
+    const token = await refreshAccessToken();
+    return Boolean(token);
   },
   logout: async (): Promise<void> => {
     try {
