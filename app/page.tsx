@@ -165,16 +165,16 @@ export default function Home() {
         <div className="surface-card w-full max-w-lg p-8">
           <h1 className="text-3xl font-black tracking-tight text-slate-900">로그인이 필요합니다</h1>
           <p className="mt-2 text-slate-600">
-            잡칼을 사용하려면 코그니토 로그인이 필요합니다. 아래 버튼을 눌러 로그인해 주세요.
+            잡칼을 사용하려면 로그인이 필요합니다. 구글 계정으로 빠르게 시작할 수 있습니다.
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <button
               onClick={() => {
                 window.location.href = authApi.getLoginUrl();
               }}
-              className="w-full rounded-2xl bg-[#136fbd] px-5 py-3 font-semibold text-white transition-colors hover:bg-[#0e5a99] shadow-[0_12px_24px_rgba(19,111,189,0.28)]"
+              className="w-full rounded-2xl border border-[#d1d5db] bg-white px-5 py-3 font-semibold text-[#111827] transition-colors hover:bg-[#f9fafb] shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
             >
-              코그니토로 로그인
+              Google로 계속하기
             </button>
             <button
               onClick={() => fetchApplications({ showLoading: true })}
@@ -242,8 +242,8 @@ export default function Home() {
                   type="button"
                   onClick={async () => {
                     setIsProfileMenuOpen(false);
-                    await authApi.logout();
                     setIsAuthenticated(false);
+                    await authApi.logoutAll();
                   }}
                   className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-700 hover:bg-rose-50"
                 >
