@@ -8,6 +8,9 @@ import { AxiosRequestConfig } from 'axios';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 const OAUTH_START_PATH =
   process.env.NEXT_PUBLIC_OAUTH_START_PATH || '/api/oauth2/authorization/cognito';
+const COGNITO_DOMAIN = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
+const COGNITO_CLIENT_ID = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
+const COGNITO_LOGOUT_URL = process.env.NEXT_PUBLIC_COGNITO_LOGOUT_URL;
 const LOGIN_PAGE_PATH = '/login';
 const LOGIN_REDIRECT_GUARD_KEY = '__jobcal_login_redirecting_at__';
 const REFRESH_TOKEN_PATH = '/auth/refresh';
@@ -211,10 +214,39 @@ export const feedbackApi = {
 
 export const authApi = {
   getLoginUrl: (): string => OAUTH_START_PATH,
-  fetchAccessToken: async (): Promise<void> => {
-    await apiClient.get('/auth/refresh');
+  getLogoutUrl: (): string | null => {
+    if (COGNITO_LOGOUT_URL) {
+      return COGNITO_LOGOUT_URL;
+    }
+    if (!COGNITO_DOMAIN || !COGNITO_CLIENT_ID || typeof window === 'undefined') {
+      return null;
+    }
+
+    const domain = COGNITO_DOMAIN.endsWith('/') ? COGNITO_DOMAIN.slice(0, -1) : COGNITO_DOMAIN;
+    const logoutUri = `${window.location.origin}${LOGIN_PAGE_PATH}`;
+    return `${domain}/logout?client_id=${encodeURIComponent(COGNITO_CLIENT_ID)}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  },
+  fetchAccessToken: async (): Promise<boolean> => {
+    const token = await refreshAccessToken();
+    return Boolean(token);
   },
   logout: async (): Promise<void> => {
-    await apiClient.post('/logout');
+    try {
+      await apiClient.post('/logout');
+    } catch (error) {
+      console.warn('Logout API request failed:', error);
+    } finally {
+      removeAuthToken();
+    }
+  },
+  logoutAll: async (): Promise<void> => {
+    await authApi.logout();
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const logoutUrl = authApi.getLogoutUrl();
+    window.location.href = logoutUrl || LOGIN_PAGE_PATH;
   },
 };
