@@ -8,6 +8,16 @@ interface JobEventProps {
   event?: { resource?: Application }; // react-big-calendar 호환용 (기존 구조)
 }
 
+const parseDeadlineDate = (value: string): Date | null => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const parsed = new Date(`${value}T12:00:00`);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 export default function JobEvent({ application, event }: JobEventProps) {
   // application prop 우선 사용, 없으면 event.resource에서 가져오기
   const app = application ?? (event?.resource as Application | undefined);
@@ -23,13 +33,13 @@ export default function JobEvent({ application, event }: JobEventProps) {
   const tooltip = [posting.company_name, title, location].filter(Boolean).join(' · ');
   const dayDiff = (() => {
     if (!posting.deadline) return null;
-    const parsed = new Date(posting.deadline);
-    if (isNaN(parsed.getTime())) return null;
-    const deadlineEnd = new Date(parsed);
-    deadlineEnd.setHours(23, 59, 59, 999);
+    const parsed = parseDeadlineDate(posting.deadline);
+    if (!parsed) return null;
+    const deadlineStart = new Date(parsed);
+    deadlineStart.setHours(0, 0, 0, 0);
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    return Math.ceil((deadlineEnd.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.floor((deadlineStart.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
   })();
   const dDayLabel = dayDiff === null
     ? null
