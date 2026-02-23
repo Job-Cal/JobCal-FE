@@ -25,6 +25,31 @@ interface ToastMessage {
   message: string;
 }
 
+const toDateKey = (value: string | Date | null | undefined): string | null => {
+  if (!value) return null;
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const toDateLabel = (dateKey: string | null): string => {
+  if (!dateKey) return '';
+  const parsed = new Date(`${dateKey}T12:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateKey;
+  return parsed.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  });
+};
+
 export default function Home() {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
@@ -43,6 +68,8 @@ export default function Home() {
   const [sortOption, setSortOption] = useState<'deadlineAsc' | 'deadlineDesc' | 'companyAsc'>(
     'deadlineAsc'
   );
+  const [isMobile, setIsMobile] = useState(false);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -107,6 +134,21 @@ export default function Home() {
     bootstrap();
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setSelectedCalendarDate(null);
+    }
+  }, [isMobile]);
+
   const requireAuth = (action: () => void) => {
     if (isAuthenticated) {
       action();
@@ -167,6 +209,19 @@ export default function Home() {
 
     return sorted;
   }, [applications, searchQuery, sortOption, statusFilter]);
+
+  const selectedDateApplications = useMemo(() => {
+    if (!selectedCalendarDate) return [];
+
+    return applications
+      .filter((app) => toDateKey(app.job_posting.deadline) === selectedCalendarDate)
+      .sort((a, b) => a.job_posting.company_name.localeCompare(b.job_posting.company_name, 'ko'));
+  }, [applications, selectedCalendarDate]);
+
+  const selectedCalendarDateLabel = useMemo(
+    () => toDateLabel(selectedCalendarDate),
+    [selectedCalendarDate]
+  );
 
   if (isLoading) {
     return (
@@ -313,6 +368,8 @@ export default function Home() {
             <JobCalendar
               applications={applications}
               onSelectEvent={(application) => requireAuth(() => handleSelectEvent(application))}
+              onSelectDate={(date) => setSelectedCalendarDate(toDateKey(date))}
+              disableInteraction={isMobile}
             />
           </div>
 
@@ -448,6 +505,70 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {selectedCalendarDate && viewMode === 'calendar' && (
+        <div className="fixed inset-0 z-[65] md:hidden" role="presentation">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-900/20 backdrop-blur-[1px]"
+            onClick={() => setSelectedCalendarDate(null)}
+            aria-label="날짜 공고 리스트 닫기"
+          />
+          <div className="absolute inset-x-0 bottom-0 max-h-[70vh] overflow-hidden rounded-t-3xl border border-[#d7e2ef] bg-white shadow-[0_-14px_40px_rgba(15,23,42,0.2)]">
+            <div className="px-4 pb-3 pt-3">
+              <div className="mx-auto mb-2 h-1.5 w-11 rounded-full bg-slate-300" aria-hidden="true" />
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-[#132033]">{selectedCalendarDateLabel}</h3>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCalendarDate(null)}
+                  className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+            <div className="max-h-[calc(70vh-58px)] overflow-y-auto px-4 pb-5">
+              {selectedDateApplications.length === 0 ? (
+                <p className="rounded-2xl border border-[#e1e9f4] bg-[#f8fbff] px-4 py-5 text-center text-sm text-slate-500">
+                  이 날짜에 마감 공고가 없습니다.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {selectedDateApplications.map((app) => (
+                    <button
+                      key={app.id}
+                      type="button"
+                      className="w-full rounded-2xl border border-[#dbe6f2] bg-white px-3 py-3 text-left shadow-[0_3px_10px_rgba(15,23,42,0.04)]"
+                      onClick={() => {
+                        setSelectedCalendarDate(null);
+                        requireAuth(() => handleSelectEvent(app));
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-slate-900">{app.job_posting.company_name}</p>
+                          <p className="mt-1 truncate text-xs text-slate-600">{app.job_posting.job_title}</p>
+                        </div>
+                        <span
+                          className="shrink-0 rounded-full px-2 py-1 text-[11px] font-bold"
+                          style={{
+                            backgroundColor: ApplicationStatusStyles[app.status].bg,
+                            color: ApplicationStatusStyles[app.status].text,
+                            border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
+                          }}
+                        >
+                          {ApplicationStatusLabels[app.status]}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <JobAddModal
         isOpen={isAddModalOpen}

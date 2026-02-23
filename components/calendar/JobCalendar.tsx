@@ -25,11 +25,19 @@ const localizer = momentLocalizer(moment);
 interface JobCalendarProps {
   applications: Application[];
   onSelectEvent?: (application: Application) => void;
+  onSelectDate?: (date: Date) => void;
+  disableInteraction?: boolean;
 }
 
-export default function JobCalendar({ applications, onSelectEvent }: JobCalendarProps) {
+export default function JobCalendar({
+  applications,
+  onSelectEvent,
+  onSelectDate,
+  disableInteraction = false,
+}: JobCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const formattedMonthLabel = moment(currentDate).format('YYYY.MM');
+  const canSelectDate = !!onSelectDate;
 
   // Convert applications to calendar events
   const events = applications
@@ -111,6 +119,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
   };
 
   const handleSelectEvent = (event: JobEvent) => {
+    if (disableInteraction) return;
     if (onSelectEvent && event.resource) {
       onSelectEvent(event.resource as Application);
     }
@@ -145,6 +154,20 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
     </div>
   );
 
+  const DateCellWrapper = ({ value, children }: { value?: Date; children?: React.ReactNode }) => (
+    <div
+      className="h-full w-full"
+      onClick={(event) => {
+        if (!canSelectDate || !value) return;
+        const target = event.target as HTMLElement | null;
+        if (target?.closest('.rbc-event')) return;
+        onSelectDate?.(value);
+      }}
+    >
+      {children}
+    </div>
+  );
+
   return (
     <div className="w-full">
       <Calendar
@@ -155,10 +178,15 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         date={currentDate}
         onNavigate={setCurrentDate}
         onSelectEvent={handleSelectEvent}
+        selectable={canSelectDate ? 'ignoreEvents' : false}
+        longPressThreshold={1}
+        onSelectSlot={canSelectDate ? (slotInfo: { start: Date }) => onSelectDate?.(slotInfo.start) : undefined}
+        onDrillDown={canSelectDate ? (date) => onSelectDate?.(date) : undefined}
         eventPropGetter={eventStyleGetter}
         components={{
           event: JobEvent,
           toolbar: Toolbar,
+          dateCellWrapper: DateCellWrapper,
         }}
         showAllEvents
         popup={false}

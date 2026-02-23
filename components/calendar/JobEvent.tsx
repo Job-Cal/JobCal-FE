@@ -8,16 +8,6 @@ interface JobEventProps {
   event?: { resource?: Application }; // react-big-calendar 호환용 (기존 구조)
 }
 
-const parseDeadlineDate = (value: string): Date | null => {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const parsed = new Date(`${value}T12:00:00`);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
 export default function JobEvent({ application, event }: JobEventProps) {
   // application prop 우선 사용, 없으면 event.resource에서 가져오기
   const app = application ?? (event?.resource as Application | undefined);
@@ -31,28 +21,6 @@ export default function JobEvent({ application, event }: JobEventProps) {
   const title = posting.job_title;
   const styleSet = ApplicationStatusStyles[app.status];
   const tooltip = [posting.company_name, title, location].filter(Boolean).join(' · ');
-  const dayDiff = (() => {
-    if (!posting.deadline) return null;
-    const parsed = parseDeadlineDate(posting.deadline);
-    if (!parsed) return null;
-    const deadlineStart = new Date(parsed);
-    deadlineStart.setHours(0, 0, 0, 0);
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    return Math.floor((deadlineStart.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
-  })();
-  const dDayLabel = dayDiff === null
-    ? null
-    : dayDiff < 0
-      ? '마감'
-      : dayDiff === 0
-        ? 'D-day'
-        : `D-${dayDiff}`;
-  const dDayToneClass = dayDiff !== null && dayDiff < 0
-    ? 'border-slate-200 bg-slate-100 text-slate-600'
-    : dayDiff !== null && dayDiff <= 3
-      ? 'border-rose-200 bg-rose-50 text-rose-700'
-      : 'border-[#d9e3ef] bg-[#f6f9fd] text-[#4c627e]';
   
   return (
     <div
@@ -69,12 +37,7 @@ export default function JobEvent({ application, event }: JobEventProps) {
         style={{ backgroundColor: styleSet?.accent }}
         aria-hidden="true"
       />
-      <span className="hidden min-w-0 flex-1 truncate font-semibold sm:block">{posting.company_name}</span>
-      {dDayLabel && (
-        <span className={`inline-flex shrink-0 rounded border px-1 py-[1px] text-[8px] font-bold sm:text-[9px] ${dDayToneClass}`}>
-          {dDayLabel}
-        </span>
-      )}
+      <span className="min-w-0 flex-1 truncate font-semibold">{posting.company_name}</span>
       {title && (
         <span className="sr-only">
           {title}
