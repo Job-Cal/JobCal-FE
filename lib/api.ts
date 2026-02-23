@@ -12,7 +12,6 @@ const COGNITO_DOMAIN = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
 const COGNITO_CLIENT_ID = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
 const COGNITO_LOGOUT_URL = process.env.NEXT_PUBLIC_COGNITO_LOGOUT_URL;
 const LOGIN_PAGE_PATH = '/login';
-const LOGIN_REDIRECT_GUARD_KEY = '__jobcal_login_redirecting_at__';
 const REFRESH_TOKEN_PATH = '/auth/refresh';
 
 if (!API_BASE_URL) {
@@ -29,21 +28,6 @@ const apiClient = axios.create({
 
 type RetryableAxiosRequestConfig = AxiosRequestConfig & { _retry?: boolean };
 let refreshTokenPromise: Promise<string | null> | null = null;
-
-const redirectToLogin = () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const lastRedirectedAt = Number(window.sessionStorage.getItem(LOGIN_REDIRECT_GUARD_KEY) || '0');
-  const now = Date.now();
-  if (now - lastRedirectedAt < 1500) {
-    return;
-  }
-
-  window.sessionStorage.setItem(LOGIN_REDIRECT_GUARD_KEY, String(now));
-  window.location.href = LOGIN_PAGE_PATH;
-};
 
 const isRefreshRequest = (config?: AxiosRequestConfig): boolean => {
   const requestUrl = `${config?.baseURL ?? ''}${config?.url ?? ''}`;
@@ -96,7 +80,6 @@ apiClient.interceptors.request.use(async (config) => {
   }
 
   if (!token) {
-    redirectToLogin();
     return Promise.reject(new axios.CanceledError('Missing, expired, or non-refreshable access token'));
   }
 
@@ -120,7 +103,6 @@ apiClient.interceptors.response.use(
 
       if (!originalRequest || originalRequest._retry || isRefreshRequest(originalRequest)) {
         removeAuthToken();
-        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -128,7 +110,6 @@ apiClient.interceptors.response.use(
       const refreshedToken = await refreshAccessToken();
 
       if (!refreshedToken) {
-        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -166,7 +147,16 @@ const normalizeApplication = (app: Application): Application => ({
 // Jobs API
 export const jobsApi = {
   parse: async (url: string): Promise<JobPostingParseResponse> => {
-    const response = await apiClient.post<JobPostingParseResponse>('/jobs/parse', { url });
+    const response = await axios.post<JobPostingParseResponse>(
+      `${API_BASE_URL}/jobs/parse`,
+      { url },
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
     return response.data;
   },
 

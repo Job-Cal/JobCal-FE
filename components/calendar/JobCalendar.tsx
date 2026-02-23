@@ -147,11 +147,6 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
 
   return (
     <div className="w-full" style={{ minHeight: 600 }}>
-      {events.length === 0 && (
-        <div className="p-4 text-center text-slate-500 mb-4">
-          마감일이 있는 공고가 없습니다. 공고를 추가하고 마감일을 입력해주세요.
-        </div>
-      )}
       <Calendar
         localizer={localizer}
         events={events}

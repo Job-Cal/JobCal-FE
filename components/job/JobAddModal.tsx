@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { X, Loader2, Info, Sparkles, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { jobsApi } from '@/lib/api';
@@ -67,6 +68,7 @@ export default function JobAddModal({
   const [addMode, setAddMode] = useState<AddMode>('parse');
   const [isParsing, setIsParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [parsedData, setParsedData] = useState<JobPostingCreate | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeadlineError, setShowDeadlineError] = useState(false);
@@ -95,6 +97,7 @@ export default function JobAddModal({
     setAddMode(initialMode);
     setShowDeadlineError(false);
     setIsDatePickerOpen(false);
+    setSaveError(null);
     if (initialMode === 'manual') {
       setParsedData((prev) => prev ?? createEmptyDraft());
     } else {
@@ -146,13 +149,14 @@ export default function JobAddModal({
       document.removeEventListener('keydown', handleKeyDown);
       previousFocusedElementRef.current?.focus();
     };
-  }, [isOpen, onClose, initialMode]);
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
   const handleParse = async (data: FormData) => {
     setIsParsing(true);
     setParseError(null);
+    setSaveError(null);
     setParsedData(null);
 
     if (!isSupportedJobUrl(data.url)) {
@@ -188,6 +192,7 @@ export default function JobAddModal({
       return;
     }
     setShowDeadlineError(false);
+    setSaveError(null);
 
     setIsSaving(true);
     try {
@@ -207,8 +212,17 @@ export default function JobAddModal({
       onClose();
     } catch (error: any) {
       console.error('❌ Error saving job:', error);
+      const isAuthError =
+        axios.isCancel(error) || (axios.isAxiosError(error) && error.response?.status === 401);
+      if (isAuthError) {
+        setParsedData((prev) => prev ?? payload);
+        onNotify?.('error', '로그인 후 이용할 수 있습니다.');
+        return;
+      }
       const message = error.response?.data?.detail || '저장 중 오류가 발생했습니다.';
-      setParseError(message);
+      // Keep the current draft in parse mode so the modal never falls back to URL input on save error.
+      setParsedData((prev) => prev ?? payload);
+      setSaveError(message);
       onNotify?.('error', message);
     } finally {
       setIsSaving(false);
@@ -505,6 +519,11 @@ export default function JobAddModal({
               </div>
 
               <div className="space-y-2">
+                {saveError && (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                    <p className="text-sm text-rose-600">{saveError}</p>
+                  </div>
+                )}
                 <div className="flex gap-2">
                 <button
                   onClick={handleSave}

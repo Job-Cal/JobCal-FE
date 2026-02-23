@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { CalendarDays, Link2, List, MessageSquareMore, PencilLine, User } from 'lucide-react';
+import { CalendarDays, Link2, List, LogIn, MessageSquareMore, PencilLine, User } from 'lucide-react';
 import JobCalendar from '@/components/calendar/JobCalendar';
 import JobAddModal, { AddMode } from '@/components/job/JobAddModal';
 import JobDetailPanel from '@/components/job/JobDetailPanel';
@@ -49,9 +49,10 @@ export default function Home() {
   const showToast = (type: ToastType, message: string) => {
     const id = Date.now() + Math.floor(Math.random() * 10000);
     setToasts((prev) => [...prev, { id, type, message }]);
+    const duration = type === 'error' ? 500 : 1200;
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 2600);
+    }, duration);
   };
 
   useEffect(() => {
@@ -106,11 +107,22 @@ export default function Home() {
     bootstrap();
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated === false) {
-      router.replace('/login');
+  const requireAuth = (action: () => void) => {
+    if (isAuthenticated) {
+      action();
+      return;
     }
-  }, [isAuthenticated, router]);
+    showToast('error', '로그인 후 이용할 수 있습니다.');
+    router.push('/login');
+  };
+
+  const requireAuthToastOnly = (action: () => void) => {
+    if (isAuthenticated) {
+      action();
+      return;
+    }
+    showToast('error', '로그인 후 이용할 수 있습니다.');
+  };
 
   const handleSelectEvent = (application: Application) => {
     setSelectedApplication(application);
@@ -167,10 +179,6 @@ export default function Home() {
     );
   }
 
-  if (isAuthenticated === false) {
-    return null;
-  }
-
   return (
     <main className="min-h-screen">
       <div className="container mx-auto px-4 py-0 md:py-0">
@@ -194,44 +202,61 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setIsFeedbackModalOpen(true)}
+              onClick={() => requireAuthToastOnly(() => setIsFeedbackModalOpen(true))}
               className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
               aria-label="피드백 보내기"
               title="피드백 보내기"
             >
               <MessageSquareMore size={18} />
             </button>
-            <div className="relative" ref={profileMenuRef}>
+            {isAuthenticated ? (
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
+                  aria-label="프로필 메뉴"
+                >
+                  <User size={18} />
+                </button>
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 z-10 mt-2 w-44 rounded-2xl border border-[#cfd8e3] bg-white/95 p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileMenuOpen(false);
+                      showToast('success', '마이페이지는 준비 중입니다.');
+                    }}
+                    className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-[#eef5fc]"
+                  >
+                    마이페이지
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsProfileMenuOpen(false);
+                      setIsAuthenticated(false);
+                      await authApi.logout();
+                      router.push('/');
+                    }}
+                    className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-700 hover:bg-rose-50"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              )}
+              </div>
+            ) : (
               <button
                 type="button"
-                onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
-                aria-label="프로필 메뉴"
+                onClick={() => router.push('/login')}
+                className="inline-flex h-11 items-center gap-2 rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 text-sm font-semibold text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
+                aria-label="로그인"
               >
-                <User size={18} />
+                <LogIn size={16} />
+                로그인
               </button>
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-44 rounded-2xl border border-[#cfd8e3] bg-white/95 p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-                <button
-                  type="button"
-                  className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-[#eef5fc]"
-                >
-                  마이페이지
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setIsProfileMenuOpen(false);
-                    setIsAuthenticated(false);
-                    await authApi.logoutAll();
-                  }}
-                  className="w-full rounded-xl px-3 py-2 text-left text-sm font-semibold text-rose-700 hover:bg-rose-50"
-                >
-                  로그아웃
-                </button>
-              </div>
             )}
-            </div>
           </div>
         </div>
 
@@ -285,7 +310,10 @@ export default function Home() {
           </div>
 
           <div className={viewMode === 'calendar' ? 'block' : 'hidden'} aria-hidden={viewMode !== 'calendar'}>
-            <JobCalendar applications={applications} onSelectEvent={handleSelectEvent} />
+            <JobCalendar
+              applications={applications}
+              onSelectEvent={(application) => requireAuth(() => handleSelectEvent(application))}
+            />
           </div>
 
           <div className={viewMode === 'list' ? 'block' : 'hidden'} aria-hidden={viewMode !== 'list'}>
@@ -352,7 +380,7 @@ export default function Home() {
                         <tr
                           key={app.id}
                           className="cursor-pointer transition-colors hover:bg-[#f2f7fd]"
-                          onClick={() => handleSelectEvent(app)}
+                          onClick={() => requireAuth(() => handleSelectEvent(app))}
                         >
                           <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900">
                             {app.job_posting.company_name}
@@ -409,6 +437,11 @@ export default function Home() {
         isSubmitting={isFeedbackSubmitting}
         onClose={() => setIsFeedbackModalOpen(false)}
         onSubmit={async (payload) => {
+          if (!isAuthenticated) {
+            showToast('error', '로그인 후 이용할 수 있습니다.');
+            router.push('/login');
+            return;
+          }
           try {
             setIsFeedbackSubmitting(true);
             await feedbackApi.create({
