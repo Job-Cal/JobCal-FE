@@ -245,7 +245,6 @@ export default function JobDetailPanel({
   return (
     <div
       className="fixed inset-0 z-40 bg-slate-900/35 backdrop-blur-[2px]"
-      onClick={onClose}
       role="presentation"
     >
       <div

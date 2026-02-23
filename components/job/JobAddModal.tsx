@@ -252,7 +252,6 @@ export default function JobAddModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-[4px]"
-      onClick={onClose}
       role="presentation"
     >
       <div
@@ -500,7 +499,7 @@ export default function JobAddModal({
                 <textarea
                   value={editingData.description || ''}
                   onChange={(e) => setParsedData({ ...editingData, description: e.target.value || null })}
-                  className="min-h-[140px] w-full rounded-2xl border border-[#cfd8e3] bg-white px-4 py-3"
+                  className="min-h-[280px] w-full resize-y rounded-2xl border border-[#cfd8e3] bg-white px-4 py-3 leading-6 md:min-h-[340px]"
                   placeholder="파싱된 공고 설명/요건이 여기에 표시됩니다."
                 />
               </div>

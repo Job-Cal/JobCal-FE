@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobCal - Home (Calendar)</title>
+  <style>
+    :root {
+      --bg: #f1f6fd;
+      --surface: #ffffff;
+      --line: #cfd8e3;
+      --brand: #136fbd;
+      --text: #132033;
+      --muted: #58677c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", sans-serif;
+      color: var(--text);
+      background: radial-gradient(900px 420px at 95% 4%, rgba(24,104,181,0.18), transparent 62%),
+                  radial-gradient(1000px 460px at 8% -8%, rgba(24,104,181,0.14), transparent 62%),
+                  var(--bg);
+    }
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 16px 32px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .logo { width: 112px; height: 112px; border-radius: 16px; background: #d7e8f8; display: grid; place-items: center; font-weight: 900; }
+    .title { font-size: 42px; font-weight: 900; letter-spacing: -0.02em; line-height: 1; }
+    .tagline { margin-top: 8px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+    .head-actions { display: flex; gap: 8px; }
+    .icon-btn { width: 44px; height: 44px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.9); }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.95), rgba(244,249,255,0.92));
+      box-shadow: 0 14px 36px rgba(54,60,74,0.08);
+      padding: 18px 24px 24px;
+    }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; padding: 4px; border: 1px solid var(--line); border-radius: 16px; background: #fff; gap: 4px; }
+    .seg button { border: 0; border-radius: 10px; padding: 10px 16px; background: transparent; font-weight: 700; color: #334155; }
+    .seg button.active { background: var(--brand); color: #fff; }
+    .add-actions { display: flex; gap: 8px; }
+    .add-actions .primary { width: 40px; height: 40px; border: 0; border-radius: 14px; background: var(--brand); color: #fff; }
+    .add-actions .ghost { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .calendar {
+      border: 1px solid #dbe6f2;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .month { text-align: center; font-weight: 900; font-size: 24px; padding: 12px 0; }
+    .week, .days { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .week div {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      border-top: 1px solid #dbe6f2;
+      border-bottom: 1px solid #dbe6f2;
+      background: #edf4fb;
+    }
+    .day {
+      min-height: 120px;
+      border-right: 1px solid #e6eef8;
+      border-bottom: 1px solid #e6eef8;
+      padding: 8px;
+      font-size: 12px;
+    }
+    .day:nth-child(7n) { border-right: 0; }
+    .event {
+      margin-top: 8px;
+      border: 1px solid #9dcff9;
+      background: #edf6ff;
+      color: #1f476f;
+      border-radius: 8px;
+      padding: 4px 6px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="header">
+      <div class="brand">
+        <div class="logo">JobCal</div>
+        <div>
+          <div class="title">JobCal</div>
+          <div class="tagline">Never Miss a Deadline</div>
+        </div>
+      </div>
+      <div class="head-actions">
+        <button class="icon-btn" aria-label="피드백"></button>
+        <button class="icon-btn" aria-label="프로필"></button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <div class="seg">
+          <button class="active">캘린더</button>
+          <button>리스트</button>
+        </div>
+        <div class="add-actions">
+          <button class="primary" aria-label="URL 파싱 추가">+</button>
+          <button class="ghost" aria-label="수동 추가">✎</button>
+        </div>
+      </div>
+
+      <div class="calendar">
+        <div class="month">2026.02</div>
+        <div class="week">
+          <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        </div>
+        <div class="days">
+          <div class="day">1<div class="event">A사 프론트엔드</div></div>
+          <div class="day">2</div><div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div>
+          <div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12<div class="event">B사 백엔드</div></div><div class="day">13</div><div class="day">14</div>
+          <div class="day">15</div><div class="day">16</div><div class="day">17</div><div class="day">18</div><div class="day">19</div><div class="day">20</div><div class="day">21</div>
+          <div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div><div class="day">27</div><div class="day">28</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
