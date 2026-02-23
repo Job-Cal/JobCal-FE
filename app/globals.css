@@ -201,7 +201,9 @@ body {
   }
 
   .job-calendar .rbc-month-row {
-    min-height: 88px;
+    min-height: 76px;
+    height: auto !important;
+    flex: 0 0 auto;
   }
 
   .job-calendar .rbc-header {
@@ -221,10 +223,37 @@ body {
   }
 
   .job-calendar .rbc-row-segment {
-    padding: 0 2px 1px 2px;
+    padding: 0 1px 1px 1px;
   }
 
   .job-calendar .rbc-show-more {
     font-size: 10px;
+  }
+
+  .job-calendar .rbc-event {
+    margin: 0;
+  }
+
+  .job-calendar .rbc-calendar {
+    height: auto !important;
+  }
+
+  .job-calendar .rbc-month-view {
+    height: auto !important;
+    flex: 0 0 auto;
+  }
+
+  .job-calendar .job-event {
+    min-height: 14px;
+    border-radius: 999px;
+    padding: 0 4px;
+    border-color: rgba(var(--line-rgb), 0.75) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: none !important;
+  }
+
+  .job-calendar .job-event > span:first-child {
+    width: 7px;
+    height: 7px;
   }
 }

@@ -146,7 +146,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
   );
 
   return (
-    <div className="min-h-[460px] w-full sm:min-h-[560px] md:min-h-[600px]">
+    <div className="w-full">
       <Calendar
         localizer={localizer}
         events={events}
@@ -164,7 +164,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         popup={false}
         views={['month']}
         className="job-calendar"
-        style={{ height: 'auto', minHeight: 460 }}
+        style={{ height: 'auto', minHeight: 0 }}
         messages={{
           next: '다음',
           previous: '이전',

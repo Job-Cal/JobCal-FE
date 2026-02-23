@@ -260,7 +260,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="surface-card px-3 pb-4 pt-2 sm:px-5 sm:pb-5 sm:pt-4 md:px-6 md:pb-6">
+        <div className="surface-card px-3 pb-2 pt-2 sm:px-5 sm:pb-5 sm:pt-4 md:px-6 md:pb-6">
           <div className="mb-2 flex items-center justify-between gap-2 sm:mb-5">
             <div className="inline-flex rounded-2xl border border-[#cfd8e3] bg-white/90 p-1">
               <button

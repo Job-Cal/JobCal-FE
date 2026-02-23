@@ -57,7 +57,7 @@ export default function JobEvent({ application, event }: JobEventProps) {
   return (
     <div
       title={tooltip}
-      className="group flex w-full items-center gap-1 rounded-md border px-[5px] py-[3px] text-[10px] leading-tight transition-all duration-150 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(44,84,128,0.12)]"
+      className="job-event group flex w-full items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] leading-tight transition-all duration-150 hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(44,84,128,0.12)] sm:px-[5px] sm:py-[3px] sm:text-[10px]"
       style={{
         backgroundColor: '#ffffff',
         color: '#1f2d40',
@@ -65,13 +65,13 @@ export default function JobEvent({ application, event }: JobEventProps) {
       }}
     >
       <span
-        className="h-2 w-2 shrink-0 rounded-full"
+        className="h-2 w-2 shrink-0 rounded-full sm:h-2 sm:w-2"
         style={{ backgroundColor: styleSet?.accent }}
         aria-hidden="true"
       />
-      <span className="min-w-0 flex-1 truncate font-semibold">{posting.company_name}</span>
+      <span className="hidden min-w-0 flex-1 truncate font-semibold sm:block">{posting.company_name}</span>
       {dDayLabel && (
-        <span className={`shrink-0 rounded border px-1 py-[1px] text-[9px] font-bold ${dDayToneClass}`}>
+        <span className={`inline-flex shrink-0 rounded border px-1 py-[1px] text-[8px] font-bold sm:text-[9px] ${dDayToneClass}`}>
           {dDayLabel}
         </span>
       )}
