@@ -274,12 +274,12 @@ export default function JobAddModal({
         aria-modal="true"
         aria-label="채용 공고 추가"
         onClick={(event) => event.stopPropagation()}
-        className={`flex w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-[#cfd8e3] bg-white/95 shadow-[0_22px_60px_rgba(15,23,42,0.25)] ${
-          addMode === 'manual' ? 'h-[90vh] md:h-[85vh]' : 'max-h-[90vh]'
+        className={`flex w-[calc(100vw-1rem)] max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#cfd8e3] bg-white/95 shadow-[0_22px_60px_rgba(15,23,42,0.25)] sm:w-full sm:rounded-3xl ${
+          addMode === 'manual' ? 'h-[92vh] sm:h-[90vh] md:h-[85vh]' : 'max-h-[92vh] sm:max-h-[90vh]'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-[#0e5a99] bg-[#136fbd] p-6">
-          <h2 className="text-2xl font-extrabold text-white">채용 공고 추가</h2>
+        <div className="flex items-center justify-between border-b border-[#0e5a99] bg-[#136fbd] p-4 sm:p-6">
+          <h2 className="text-xl font-extrabold text-white sm:text-2xl">채용 공고 추가</h2>
           <button
             onClick={onClose}
             className="text-white/80 transition-colors hover:text-white"
@@ -289,7 +289,7 @@ export default function JobAddModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-[#edf4fb] p-6">
+        <div className="flex-1 overflow-y-auto bg-[#edf4fb] p-4 sm:p-6">
           {addMode === 'parse' && !parsedData ? (
             <form onSubmit={handleSubmit(handleParse)} className="space-y-4">
               <div>
@@ -336,7 +336,7 @@ export default function JobAddModal({
                 </div>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
                 <button
                   type="submit"
                   disabled={isParsing}
@@ -355,7 +355,7 @@ export default function JobAddModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd]"
+                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd] sm:w-auto"
                 >
                   취소
                 </button>
@@ -513,7 +513,7 @@ export default function JobAddModal({
                 <textarea
                   value={editingData.description || ''}
                   onChange={(e) => setParsedData({ ...editingData, description: e.target.value || null })}
-                  className="min-h-[280px] w-full resize-y rounded-2xl border border-[#cfd8e3] bg-white px-4 py-3 leading-6 md:min-h-[340px]"
+                  className="min-h-[220px] w-full resize-y rounded-2xl border border-[#cfd8e3] bg-white px-4 py-3 leading-6 sm:min-h-[280px] md:min-h-[340px]"
                   placeholder="파싱된 공고 설명/요건이 여기에 표시됩니다."
                 />
               </div>
@@ -524,7 +524,7 @@ export default function JobAddModal({
                     <p className="text-sm text-rose-600">{saveError}</p>
                   </div>
                 )}
-                <div className="flex gap-2">
+                <div className="flex flex-col-reverse gap-2 sm:flex-row">
                 <button
                   onClick={handleSave}
                   disabled={isSaving || !editingData.company_name || !editingData.job_title || !editingData.deadline}
@@ -541,7 +541,7 @@ export default function JobAddModal({
                 </button>
                 <button
                   onClick={onClose}
-                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd]"
+                  className="rounded-2xl border border-[#cfd8e3] px-4 py-2 hover:bg-[#f2f7fd] sm:w-auto"
                 >
                   취소
                 </button>

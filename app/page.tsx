@@ -181,20 +181,20 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <div className="container mx-auto px-4 py-0 md:py-0">
-        <div className="-mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="container mx-auto px-3 py-2 sm:px-4 sm:py-0">
+        <div className="mb-1 flex items-center justify-between gap-2 sm:mb-0">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Image
               src="/jobcal-logo.png"
               alt="JobCal logo"
               width={112}
               height={112}
-              className="h-[112px] w-[112px] rounded-xl object-contain"
+              className="h-16 w-16 rounded-xl object-contain sm:h-24 sm:w-24 md:h-[112px] md:w-[112px]"
               priority
             />
-            <div className="flex h-[112px] flex-col justify-center leading-none">
-              <h1 className="text-3xl font-black tracking-tight text-[#132033] md:text-4xl">JobCal</h1>
-              <p className="mt-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#58677c] md:text-sm">
+            <div className="flex h-16 flex-col justify-center leading-none sm:h-24 md:h-[112px]">
+              <h1 className="text-2xl font-black tracking-tight text-[#132033] sm:text-3xl md:text-4xl">JobCal</h1>
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#58677c] sm:mt-1.5 sm:text-xs md:text-sm">
                 Never Miss a Deadline
               </p>
             </div>
@@ -203,7 +203,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => requireAuthToastOnly(() => setIsFeedbackModalOpen(true))}
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99] sm:h-11 sm:w-11"
               aria-label="피드백 보내기"
               title="피드백 보내기"
             >
@@ -214,7 +214,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-                  className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
+                  className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#cfd8e3] bg-white/85 text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99] sm:h-11 sm:w-11"
                   aria-label="프로필 메뉴"
                 >
                   <User size={18} />
@@ -250,7 +250,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => router.push('/login')}
-                className="inline-flex h-11 items-center gap-2 rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 text-sm font-semibold text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99]"
+                className="inline-flex h-10 items-center gap-2 rounded-2xl border border-[#cfd8e3] bg-white/90 px-4 text-sm font-semibold text-[#435067] transition-colors hover:border-[#136fbd] hover:text-[#0e5a99] sm:h-11"
                 aria-label="로그인"
               >
                 <LogIn size={16} />
@@ -260,14 +260,14 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="surface-card px-6 pb-6 pt-4">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="surface-card px-3 pb-4 pt-2 sm:px-5 sm:pb-5 sm:pt-4 md:px-6 md:pb-6">
+          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-5">
             <div className="inline-flex rounded-2xl border border-[#cfd8e3] bg-white/90 p-1">
               <button
                 type="button"
                 onClick={() => setViewMode('calendar')}
                 aria-label="달력 모드"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                   viewMode === 'calendar'
                     ? 'bg-[#136fbd] text-white'
                     : 'text-slate-700 hover:bg-[#eef5fc]'
@@ -279,7 +279,7 @@ export default function Home() {
                 type="button"
                 onClick={() => setViewMode('list')}
                 aria-label="전체 지원 현황 모드"
-                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                   viewMode === 'list'
                     ? 'bg-[#136fbd] text-white'
                     : 'text-slate-700 hover:bg-[#eef5fc]'
@@ -347,9 +347,50 @@ export default function Home() {
                 <option value="companyAsc">회사명 가나다순</option>
               </select>
             </div>
-            <div className="overflow-hidden rounded-2xl border border-[#dbe6f2]">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+            {filteredApplications.length === 0 ? (
+              <div className="rounded-2xl border border-[#dbe6f2] bg-white px-4 py-8 text-center text-sm text-slate-500">
+                {applications.length === 0
+                  ? '등록된 채용 공고가 없습니다.'
+                  : '현재 필터 조건에 맞는 공고가 없습니다.'}
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2 md:hidden">
+                  {filteredApplications.map((app) => (
+                    <button
+                      key={app.id}
+                      type="button"
+                      className="w-full rounded-2xl border border-[#dbe6f2] bg-white p-4 text-left shadow-[0_4px_14px_rgba(15,23,42,0.04)] transition-colors hover:bg-[#f8fbff]"
+                      onClick={() => requireAuth(() => handleSelectEvent(app))}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-slate-900">{app.job_posting.company_name}</p>
+                          <p className="mt-1 truncate text-sm text-slate-600">{app.job_posting.job_title}</p>
+                        </div>
+                        <span
+                          className="shrink-0 rounded-full px-2 py-1 text-[11px] font-bold"
+                          style={{
+                            backgroundColor: ApplicationStatusStyles[app.status].bg,
+                            color: ApplicationStatusStyles[app.status].text,
+                            border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
+                          }}
+                        >
+                          {ApplicationStatusLabels[app.status]}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-xs font-medium text-slate-500">
+                        마감일:{' '}
+                        {app.job_posting.deadline
+                          ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
+                          : '-'}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden overflow-hidden rounded-2xl border border-[#dbe6f2] md:block">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
                   <thead className="bg-[#edf4fb]">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-bold text-[#58677c] uppercase tracking-wider">
@@ -367,51 +408,43 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e6eef8] bg-white">
-                    {filteredApplications.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="px-6 py-4 text-center text-slate-500">
-                          {applications.length === 0
-                            ? '등록된 채용 공고가 없습니다.'
-                            : '현재 필터 조건에 맞는 공고가 없습니다.'}
+                    {filteredApplications.map((app) => (
+                      <tr
+                        key={app.id}
+                        className="cursor-pointer transition-colors hover:bg-[#f2f7fd]"
+                        onClick={() => requireAuth(() => handleSelectEvent(app))}
+                      >
+                        <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900">
+                          {app.job_posting.company_name}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                          {app.job_posting.job_title}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                          {app.job_posting.deadline
+                            ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
+                            : '-'}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <span
+                            className="rounded-full px-2 py-1 text-xs font-bold"
+                            style={{
+                              backgroundColor: ApplicationStatusStyles[app.status].bg,
+                              color: ApplicationStatusStyles[app.status].text,
+                              border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
+                            }}
+                          >
+                            {ApplicationStatusLabels[app.status]}
+                          </span>
                         </td>
                       </tr>
-                    ) : (
-                      filteredApplications.map((app) => (
-                        <tr
-                          key={app.id}
-                          className="cursor-pointer transition-colors hover:bg-[#f2f7fd]"
-                          onClick={() => requireAuth(() => handleSelectEvent(app))}
-                        >
-                          <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900">
-                            {app.job_posting.company_name}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                            {app.job_posting.job_title}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                            {app.job_posting.deadline
-                              ? new Date(app.job_posting.deadline).toLocaleDateString('ko-KR')
-                              : '-'}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4">
-                            <span
-                              className="rounded-full px-2 py-1 text-xs font-bold"
-                              style={{
-                                backgroundColor: ApplicationStatusStyles[app.status].bg,
-                                color: ApplicationStatusStyles[app.status].text,
-                                border: `1px solid ${ApplicationStatusStyles[app.status].border}`,
-                              }}
-                            >
-                              {ApplicationStatusLabels[app.status]}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
-                </table>
-              </div>
-            </div>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -460,11 +493,11 @@ export default function Home() {
         }}
       />
 
-      <div className="fixed right-4 top-4 z-[70] space-y-2">
+      <div className="fixed left-3 right-3 top-3 z-[70] space-y-2 sm:left-auto sm:right-4 sm:top-4">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`min-w-[240px] max-w-[360px] rounded-2xl border px-4 py-3 text-sm font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur ${
+            className={`w-full rounded-2xl border px-4 py-3 text-sm font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur sm:min-w-[240px] sm:max-w-[360px] ${
               toast.type === 'success'
                 ? 'border-emerald-200 bg-emerald-50/95 text-emerald-700'
                 : 'border-rose-200 bg-rose-50/95 text-rose-700'

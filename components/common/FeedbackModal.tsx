@@ -75,9 +75,9 @@ export default function FeedbackModal({ isOpen, isSubmitting, onClose, onSubmit 
         aria-modal="true"
         aria-label="피드백 보내기"
         onClick={(event) => event.stopPropagation()}
-        className="flex w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-[#cfd8e3] bg-white/95 shadow-[0_22px_60px_rgba(15,23,42,0.25)]"
+        className="flex w-[calc(100vw-1rem)] max-w-xl flex-col overflow-hidden rounded-2xl border border-[#cfd8e3] bg-white/95 shadow-[0_22px_60px_rgba(15,23,42,0.25)] sm:w-full sm:rounded-3xl"
       >
-        <div className="flex items-center justify-between border-b border-[#0e5a99] bg-[#136fbd] p-6">
+        <div className="flex items-center justify-between border-b border-[#0e5a99] bg-[#136fbd] p-4 sm:p-6">
           <h2 className="text-xl font-extrabold text-white">피드백 보내기</h2>
           <button
             onClick={onClose}
@@ -88,7 +88,7 @@ export default function FeedbackModal({ isOpen, isSubmitting, onClose, onSubmit 
           </button>
         </div>
 
-        <div className="space-y-4 bg-[#edf4fb] p-6">
+        <div className="space-y-4 bg-[#edf4fb] p-4 sm:p-6">
           <div className="rounded-2xl border border-[#d6e4f4] bg-white p-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#4d6682]">
               <MessageSquareWarning size={14} />
@@ -119,7 +119,7 @@ export default function FeedbackModal({ isOpen, isSubmitting, onClose, onSubmit 
                 setMessage(event.target.value);
                 if (event.target.value.trim()) setShowError(false);
               }}
-              className={`min-h-[140px] w-full rounded-2xl bg-white px-4 py-3 text-sm text-slate-700 ${
+              className={`min-h-[120px] w-full rounded-2xl bg-white px-4 py-3 text-sm text-slate-700 sm:min-h-[140px] ${
                 showError ? 'border border-rose-500' : 'border border-[#cfd8e3]'
               }`}
               placeholder="불편한 점이나 개선 아이디어를 자유롭게 적어주세요."
@@ -129,7 +129,7 @@ export default function FeedbackModal({ isOpen, isSubmitting, onClose, onSubmit 
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <button
               onClick={async () => {
                 const trimmed = message.trim();

@@ -118,7 +118,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
 
 
   const Toolbar = ({ onNavigate }: { label: string; onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY') => void }) => (
-    <div className="rbc-toolbar -mt-10 mb-5">
+    <div className="rbc-toolbar -mt-1 mb-2 sm:-mt-6 sm:mb-5 md:-mt-10">
       <div className="inline-flex w-full items-center justify-center">
       <button
         type="button"
@@ -129,7 +129,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
       >
         <ChevronLeft size={18} />
       </button>
-      <span className="mx-[14px] px-0 text-center text-[20px] font-black leading-none tracking-tight text-[#132033]">
+      <span className="mx-[14px] px-0 text-center text-[18px] font-black leading-none tracking-tight text-[#132033] sm:text-[20px]">
         {formattedMonthLabel}
       </span>
       <button
@@ -146,7 +146,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
   );
 
   return (
-    <div className="w-full" style={{ minHeight: 600 }}>
+    <div className="min-h-[460px] w-full sm:min-h-[560px] md:min-h-[600px]">
       <Calendar
         localizer={localizer}
         events={events}
@@ -164,7 +164,7 @@ export default function JobCalendar({ applications, onSelectEvent }: JobCalendar
         popup={false}
         views={['month']}
         className="job-calendar"
-        style={{ height: 'auto', minHeight: 600 }}
+        style={{ height: 'auto', minHeight: 460 }}
         messages={{
           next: '다음',
           previous: '이전',

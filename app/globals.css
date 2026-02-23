@@ -190,3 +190,41 @@ body {
   background: rgba(var(--surface-rgb), 0.78);
   border-radius: 16px;
 }
+
+@media (max-width: 640px) {
+  .surface-card {
+    border-radius: 18px;
+  }
+
+  .job-calendar .rbc-calendar {
+    font-size: 12px;
+  }
+
+  .job-calendar .rbc-month-row {
+    min-height: 88px;
+  }
+
+  .job-calendar .rbc-header {
+    padding: 6px 0;
+    font-size: 11px;
+  }
+
+  .job-calendar .rbc-date-cell {
+    padding-right: 4px;
+    padding-top: 3px;
+  }
+
+  .job-calendar .rbc-date-cell > a {
+    min-width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .job-calendar .rbc-row-segment {
+    padding: 0 2px 1px 2px;
+  }
+
+  .job-calendar .rbc-show-more {
+    font-size: 10px;
+  }
+}

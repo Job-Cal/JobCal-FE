@@ -253,9 +253,9 @@ export default function JobDetailPanel({
         aria-modal="true"
         aria-label="채용 상세 모달"
         onClick={(event) => event.stopPropagation()}
-        className="fixed left-1/2 top-1/2 z-50 flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-3xl border border-[#cfd8e3] bg-white/95 shadow-[0_28px_70px_rgba(15,23,42,0.24)]"
+        className="fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-[#cfd8e3] bg-white/95 shadow-[0_28px_70px_rgba(15,23,42,0.24)] sm:max-h-[90vh] sm:w-[calc(100vw-2rem)] sm:rounded-3xl"
       >
-        <div className="flex items-center justify-between border-b border-[#0e5a99] bg-[#136fbd] p-6">
+        <div className="flex items-center justify-between border-b border-[#0e5a99] bg-[#136fbd] p-4 sm:p-6">
           <h2 className="text-xl font-extrabold text-white">채용 상세</h2>
           <button
             data-autofocus
@@ -267,7 +267,7 @@ export default function JobDetailPanel({
           </button>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto bg-[#eef4fb] p-6">
+        <div className="flex-1 space-y-4 overflow-y-auto bg-[#eef4fb] p-4 sm:p-6">
           <div className="rounded-2xl border-2 border-[#c9d9ea] bg-white p-4 shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
             <div className="mb-2 flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -502,7 +502,7 @@ export default function JobDetailPanel({
           </div>
         </div>
 
-        <div className="border-t border-[#dbe6f2] bg-[#f2f7fd] p-6">
+        <div className="border-t border-[#dbe6f2] bg-[#f2f7fd] p-4 sm:p-6">
           <button
             onClick={async () => {
               if (confirm('정말 삭제하시겠습니까?')) {
