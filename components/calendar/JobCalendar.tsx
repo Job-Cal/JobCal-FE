@@ -22,6 +22,27 @@ interface JobEvent extends Event {
 
 const localizer = momentLocalizer(moment);
 
+const HOLIDAY_LABELS: Record<string, string> = {
+  '2026-01-01': '신정',
+  '2026-02-16': '설날 연휴',
+  '2026-02-17': '설날',
+  '2026-02-18': '설날 연휴',
+  '2026-03-01': '삼일절',
+  '2026-05-05': '어린이날',
+  '2026-06-06': '현충일',
+  '2026-08-15': '광복절',
+  '2026-10-03': '개천절',
+  '2026-10-09': '한글날',
+  '2026-12-25': '성탄절',
+};
+
+const toDateKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface JobCalendarProps {
   applications: Application[];
   onSelectEvent?: (application: Application) => void;
@@ -38,6 +59,16 @@ export default function JobCalendar({
   const [currentDate, setCurrentDate] = useState(new Date());
   const formattedMonthLabel = moment(currentDate).format('YYYY.MM');
   const canSelectDate = !!onSelectDate;
+
+  const getDayMeta = (date: Date) => {
+    const day = date.getDay();
+    const dateKey = toDateKey(date);
+    return {
+      isSunday: day === 0,
+      isSaturday: day === 6,
+      isHoliday: !!HOLIDAY_LABELS[dateKey],
+    };
+  };
 
   // Convert applications to calendar events
   const events = applications
@@ -154,6 +185,25 @@ export default function JobCalendar({
     </div>
   );
 
+  const DateHeader = ({ date, label }: { date: Date; label: string }) => {
+    const meta = getDayMeta(date);
+    return (
+      <div className="rbc-custom-date-header">
+        <span
+          className={`rbc-custom-date-number ${
+            meta.isHoliday || meta.isSunday
+              ? 'rbc-date-red'
+              : meta.isSaturday
+                ? 'rbc-date-blue'
+                : ''
+          }`}
+        >
+          {label}
+        </span>
+      </div>
+    );
+  };
+
   const DateCellWrapper = ({ value, children }: { value?: Date; children?: React.ReactNode }) => (
     <div
       className="h-full w-full"
@@ -182,11 +232,25 @@ export default function JobCalendar({
         longPressThreshold={1}
         onSelectSlot={canSelectDate ? (slotInfo: { start: Date }) => onSelectDate?.(slotInfo.start) : undefined}
         onDrillDown={canSelectDate ? (date) => onSelectDate?.(date) : undefined}
+        dayPropGetter={(date: Date) => {
+          const meta = getDayMeta(date);
+          const classNames = [
+            meta.isSunday ? 'rbc-day-sunday' : '',
+            meta.isSaturday ? 'rbc-day-saturday' : '',
+            meta.isHoliday ? 'rbc-day-holiday' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
+          return { className: classNames };
+        }}
         eventPropGetter={eventStyleGetter}
         components={{
           event: JobEvent,
           toolbar: Toolbar,
           dateCellWrapper: DateCellWrapper,
+          month: {
+            dateHeader: DateHeader,
+          },
         }}
         showAllEvents
         popup={false}

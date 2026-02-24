@@ -12,6 +12,7 @@ interface JobDetailPanelProps {
   onClose: () => void;
   onUpdate: () => void;
   onNotify?: (type: 'success' | 'error', message: string) => void;
+  readOnly?: boolean;
 }
 
 const toDateInputValue = (value: string | null | undefined): string => {
@@ -80,6 +81,7 @@ export default function JobDetailPanel({
   onClose,
   onUpdate,
   onNotify,
+  readOnly = false,
 }: JobDetailPanelProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<ApplicationStatus>(ApplicationStatus.NOT_APPLIED);
@@ -155,7 +157,7 @@ export default function JobDetailPanel({
   }, [isOpen, onClose]);
 
   const handleStatusChange = async (status: ApplicationStatus) => {
-    if (!application) return;
+    if (!application || readOnly) return;
     const previousStatus = currentStatus;
     setIsUpdating(true);
     setCurrentStatus(status);
@@ -178,7 +180,7 @@ export default function JobDetailPanel({
 
   const originalDeadline = toDateInputValue(appDeadline);
   const handleDeadlineChange = async (nextDeadline: string) => {
-    if (!application) return;
+    if (!application || readOnly) return;
     setDeadlineInput(nextDeadline);
     if (!nextDeadline || nextDeadline === originalDeadline || isDeadlineSaving) return;
 
@@ -296,8 +298,14 @@ export default function JobDetailPanel({
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setIsDatePickerOpen((prev) => !prev)}
-                className="flex w-full items-center justify-between rounded-2xl border border-[#cfd8e3] bg-white px-3 py-2.5 text-left text-sm text-slate-700 transition-colors hover:border-[#9dcff9]"
+                onClick={() => {
+                  if (readOnly) return;
+                  setIsDatePickerOpen((prev) => !prev);
+                }}
+                className={`flex w-full items-center justify-between rounded-2xl border border-[#cfd8e3] bg-white px-3 py-2.5 text-left text-sm text-slate-700 transition-colors ${
+                  readOnly ? 'cursor-not-allowed opacity-80' : 'hover:border-[#9dcff9]'
+                }`}
+                disabled={readOnly}
               >
                 <span className="inline-flex items-center gap-2">
                   <Calendar size={16} className="text-slate-500" />
@@ -306,7 +314,7 @@ export default function JobDetailPanel({
                 <span className="text-xs font-semibold text-slate-500">{isDatePickerOpen ? '닫기' : '선택'}</span>
               </button>
 
-              {isDatePickerOpen && (
+              {!readOnly && isDatePickerOpen && (
                 <div className="absolute left-0 top-[calc(100%+8px)] z-20 w-full rounded-2xl border border-[#dbe6f2] bg-white p-3 shadow-[0_16px_40px_rgba(15,23,42,0.16)]">
                   <div className="mb-2 flex items-center justify-between">
                     <button
@@ -374,6 +382,9 @@ export default function JobDetailPanel({
               {isDeadlineSaving && (
                 <p className="mt-2 text-xs text-[#58677c]">마감일 저장 중...</p>
               )}
+              {readOnly && (
+                <p className="mt-2 text-xs text-[#58677c]">로그인 후 마감일을 수정할 수 있습니다.</p>
+              )}
             </div>
           </div>
 
@@ -385,8 +396,14 @@ export default function JobDetailPanel({
             <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => setIsStatusOpen((prev) => !prev)}
-                className="flex w-full items-center justify-between rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2 text-slate-800 transition-colors hover:border-[#9dcff9]"
+                onClick={() => {
+                  if (readOnly) return;
+                  setIsStatusOpen((prev) => !prev);
+                }}
+                className={`flex w-full items-center justify-between rounded-2xl border border-[#cfd8e3] bg-white px-4 py-2 text-slate-800 transition-colors ${
+                  readOnly ? 'cursor-not-allowed opacity-80' : 'hover:border-[#9dcff9]'
+                }`}
+                disabled={readOnly}
               >
                 <span className="inline-flex items-center gap-2 font-semibold">
                   <span
@@ -396,10 +413,10 @@ export default function JobDetailPanel({
                   />
                   {ApplicationStatusLabels[currentStatus]}
                 </span>
-                <span className="text-xs">{isStatusOpen ? '닫기' : '변경'}</span>
+                <span className="text-xs">{readOnly ? '' : isStatusOpen ? '닫기' : '변경'}</span>
               </button>
 
-              {isStatusOpen && (
+              {!readOnly && isStatusOpen && (
                 <div className="space-y-2">
                   {Object.values(ApplicationStatus).map((status) => (
                     <button
@@ -425,6 +442,9 @@ export default function JobDetailPanel({
                     </button>
                   ))}
                 </div>
+              )}
+              {readOnly && (
+                <p className="text-xs text-[#58677c]">로그인 후 지원 상태를 변경할 수 있습니다.</p>
               )}
             </div>
           </div>
@@ -502,26 +522,28 @@ export default function JobDetailPanel({
           </div>
         </div>
 
-        <div className="border-t border-[#dbe6f2] bg-[#f2f7fd] p-4 sm:p-6">
-          <button
-            onClick={async () => {
-              if (confirm('정말 삭제하시겠습니까?')) {
-                try {
-                  await applicationsApi.delete(application.id);
-                  onUpdate();
-                  onClose();
-                  onNotify?.('success', '공고를 삭제했습니다.');
-                } catch (error) {
-                  console.error('Failed to delete:', error);
-                  onNotify?.('error', '공고 삭제에 실패했습니다.');
+        {!readOnly && (
+          <div className="border-t border-[#dbe6f2] bg-[#f2f7fd] p-4 sm:p-6">
+            <button
+              onClick={async () => {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                  try {
+                    await applicationsApi.delete(application.id);
+                    onUpdate();
+                    onClose();
+                    onNotify?.('success', '공고를 삭제했습니다.');
+                  } catch (error) {
+                    console.error('Failed to delete:', error);
+                    onNotify?.('error', '공고 삭제에 실패했습니다.');
+                  }
                 }
-              }
-            }}
-            className="w-full rounded-2xl bg-rose-600 px-4 py-2 text-white transition-colors hover:bg-rose-700"
-          >
-            삭제하기
-          </button>
-        </div>
+              }}
+              className="w-full rounded-2xl bg-rose-600 px-4 py-2 text-white transition-colors hover:bg-rose-700"
+            >
+              삭제하기
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
